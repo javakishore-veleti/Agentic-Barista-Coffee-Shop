@@ -19,8 +19,8 @@ modifier model that both the cart and the barista agent will use.
 
 1. **Given** an item, **when** its detail view opens, **then** it shows full description, price, all allergens,
    all available modifiers, and its dietary tags.
-2. **Given** Brakeman's Blend drip, **when** its detail renders, **then** the tasting notes (plum, brown sugar,
-   molasses) and origin (Guatemala and Colombia) are shown.
+2. **Given** AKIV House Blend drip, **when** its detail renders, **then** the tasting notes (plum, brown sugar,
+   molasses) and origin (Colombia and Honduras) are shown.
 3. **Given** an item flagged `selection_at_counter`, **when** its detail renders, **then** it states clearly
    that the specific choice is made at the case on arrival and lists the known rotation.
 4. **Given** the detail view opened from the grid, **when** it is dismissed, **then** focus returns to the
@@ -53,7 +53,7 @@ Item photography and nutrition information.
 
 ### Notes
 
-"No pre-selected default for temperature" is deliberate. Half the Brakeman's drink menu is hot-or-iced, and a
+"No pre-selected default for temperature" is deliberate. Half the AKIV Coffee drink menu is hot-or-iced, and a
 silent default is how a customer ends up with the wrong drink and the agent ends up with a bad habit to copy.
 
 ### Out of scope

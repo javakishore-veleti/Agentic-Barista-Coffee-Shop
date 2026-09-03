@@ -9,7 +9,7 @@ issuance behind adapters shaped like a real gift card and payments API.
 
 ## Two rules
 
-1. **The ledger is global.** A card bought in Matthews redeems in Charlotte. Branch is an attribute of a
+1. **The ledger is global.** A card bought at the reference branch redeems in Charlotte. Branch is an attribute of a
    movement, never a partition of the balance.
 2. **Balance is the sum of movements**, computed, never a separately stored figure that can drift.
 

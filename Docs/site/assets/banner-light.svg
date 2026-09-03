@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 280" width="1200" height="280" role="img" aria-label="Brakeman's Agent Platform">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 280" width="1200" height="280" role="img" aria-label="AKIV Barista Coffee Shop Agentic Platform">
   <rect width="1200" height="280" fill="#EDEFEC"/>
   <rect x="0" y="0" width="1200" height="4" fill="#26674B"/>
   <g font-family="Georgia, 'Times New Roman', serif">
-    <text x="72" y="112" font-size="60" font-weight="700" fill="#151A18" letter-spacing="-1">BRAKEMAN'S</text>
-    <text x="72" y="176" font-size="60" font-weight="700" fill="#26674B" letter-spacing="-1">AGENT PLATFORM</text>
+    <text x="72" y="112" font-size="60" font-weight="700" fill="#151A18" letter-spacing="-1">AKIV BARISTA</text>
+    <text x="72" y="176" font-size="60" font-weight="700" fill="#26674B" letter-spacing="-1">AGENTIC PLATFORM</text>
   </g>
   <g font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" fill="#5C6663">
     <text x="74" y="216" font-size="16" letter-spacing="2.4">GOOGLE ADK · LANGGRAPH · LANGCHAIN · MCP · FASTAPI · ANGULAR</text>

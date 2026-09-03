@@ -15,7 +15,7 @@ not a default framework theme.
 
 ## STORY-0001-01-01 — Define the token set
 
-**As a** developer building any Brakeman's screen
+**As a** developer building any AKIV Coffee screen
 **I want** a documented set of colour, type, spacing and elevation tokens
 **So that** I never choose a hex value or a pixel size by hand.
 
@@ -78,7 +78,7 @@ A theme toggle control in the shell; that is `STORY-0001-02-04`.
 ## STORY-0001-01-03 — Typography and iconography
 
 **As a** visitor
-**I want** the site to read like Brakeman's
+**I want** the site to read like AKIV Coffee
 **So that** it feels like the shop I walk into rather than a template.
 
 ### Acceptance criteria

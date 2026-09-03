@@ -6,7 +6,7 @@
 
 ## Intent
 
-Before a single agent exists, a customer should be able to open the site, learn where and when Brakeman's
+Before a single agent exists, a customer should be able to open the site, learn where and when AKIV Coffee
 is open, browse the real menu, customise an item, and build a cart. This is the ordinary path — and it
 must be genuinely good on its own, because a chat surface that only wraps a broken storefront is a demo,
 not a product.
@@ -20,7 +20,7 @@ speculation we avoid shipping.
 ## Success measures
 
 - A customer can reach a priced, valid cart without ever opening a chat window.
-- Every menu item on the real Brakeman's menu is representable in the fixture without a special case.
+- Every menu item on the real AKIV Coffee menu is representable in the fixture without a special case.
 - Filtering by dietary need returns correct results with no client-side guessing about allergens.
 
 ## Features

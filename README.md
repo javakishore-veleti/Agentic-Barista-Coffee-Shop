@@ -1,11 +1,11 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="Docs/site/assets/banner-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="Docs/site/assets/banner-light.svg">
-  <img alt="Brakeman's Agent Platform" src="Docs/site/assets/banner-light.svg" width="100%">
+  <img alt="AKIV Barista Coffee Shop Agentic Platform" src="Docs/site/assets/banner-light.svg" width="100%">
 </picture>
 
 <p align="center">
-  <b>Three agentic surfaces for a real coffee shop — coffee ordering, private events, and gift cards —<br>
+  <b>Three agentic surfaces for a 1,000-branch coffee chain — coffee ordering, private events, and gift cards —<br>
   each on a different framework, over pluggable providers and pluggable stores.</b>
 </p>
 
@@ -47,13 +47,12 @@
 
 ## What this is
 
-A platform for **Brakeman's Coffee & Supply** — a coffee chain of 1,000 branches across the United States.
-The fixtures are modelled on a real independent shop in Matthews, NC, whose published menu, hours and event
-rates seed the reference branch. Three separate agentic conversations:
+A platform for **AKIV Coffee** — a coffee chain of 1,000 branches across the United States.
+The seeded reference branch supplies the menu, hours and event rates the fixtures are built from. Three separate agentic conversations:
 
 | Surface | What a customer does | Grounded in |
 |---|---|---|
-| **Barista** | Orders coffee and pastries | The live catalog — Brakeman's Blend (plum, brown sugar, molasses; Guatemala + Colombia), Queen Bee, LoCoMocha, Ticket to London, Slow-berry Matcha, Barb's Butter Bars, Lenny Boy Kombucha |
+| **Barista** | Orders coffee and pastries | The live catalog — AKIV House Blend (cocoa, toasted almond, dried cherry; Colombia + Honduras), Honeycomb, Coconut Mocha, Earl Grey Fog, Strawberry Honey Matcha, Butter Bars, local kombucha |
 | **Events** | Books the room for a private event | Weeknights and Sundays only; $300 / 2h weeknight, $400 / 2h or $500 / 3h Sunday, plus 1h setup and 30min cleanup |
 | **Gift cards** | Buys, reloads, checks balance | $5 / $10 / $20 / $50 / custom, individual or pooled group card, delivered by SMS or email, now or scheduled |
 
@@ -213,7 +212,7 @@ EVENTS_BOOKING_PG_DSN=…     # …bookings always Postgres
 
 ```dotenv
 AUTH_PROVIDER=basic          # basic | cognito | entra_id | gcp_identity
-AUTH_PG_DSN=postgresql://brakemans@postgres:5432/authz
+AUTH_PG_DSN=postgresql://akiv@postgres:5432/authz
 ```
 
 `authz-api` is the only service that knows which identity provider is in play. Whichever it is, it emits
@@ -265,7 +264,7 @@ is doubly unable to issue a gift card — capability and authority are separate 
 |---|---|---|
 | **Menu** | No — brand-wide and identical | Only availability, the daily rotation, and occasional regional price override |
 | **Events** | Yes, substantially | Branch size tier sets capacity, hostable event types, staffing cost — and therefore the rate card |
-| **Gift cards** | No, and must not | A card bought in Matthews redeems in Charlotte. Branch is an attribute of a transaction, never a partition of the balance |
+| **Gift cards** | No, and must not | A card bought at the reference branch redeems in Charlotte. Branch is an attribute of a transaction, never a partition of the balance |
 
 ```
 catalog_items        ~50 rows    brand-wide, canonical, embedded exactly once
@@ -281,7 +280,7 @@ price_override_request  proposed_price · reason · requested_by · status · ap
 **Tiering is data, not an enum.** Seats is the primary driver (event capacity is literally seats), square
 footage breaks ties, and `staffing_cost_index` modifies price rather than capacity. A nightly job assigns
 tiers from metrics; a branch can be pinned manually *with a recorded reason*, and the job leaves it alone.
-Start with four tiers and let the table prove that number. Matthews seeds the mid tier as real
+Start with four tiers and let the table prove that number. the reference branch seeds the mid tier as real
 `event_rate_card` rows — not constants in code.
 
 **Price authority is a policy table with an approval trail.** A regional manager proposes an override; inside
@@ -298,7 +297,7 @@ reason, an actor and a timestamp — so "why is a latte $6.25 in Raleigh" has an
 > rows a year. That is a b-tree on `(branch_id, effective_date)`, not a vector problem.
 
 `branch_id` is a **required** parameter on nearly every MCP tool. A tool called without one fails loudly
-rather than defaulting to a flagship — a barista answering from Matthews' availability while the customer
+rather than defaulting to a flagship — a barista answering from the flagship's availability while the customer
 stands in Raleigh is worse than one that asks which store.
 
 **An order is a commerce document, not a list of drinks:**
@@ -328,10 +327,10 @@ tax_rate           jurisdiction_id · category (prepared|grocery|merchandise)
                    rate · effective_from · effective_to · rate_version
 ```
 
-| Matthews, NC — seed data | Prepared drink | Whole bean / merchandise |
+| Reference jurisdiction — seed data | Prepared drink | Whole bean / merchandise |
 |---|---|---|
 | NC state | 4.75% | 4.75% |
-| Mecklenburg County + transit | 2.50% | 2.50% |
+| County + transit | 2.50% | 2.50% |
 | Prepared food & beverage | 1.00% | — |
 | **Combined** | **8.25%** | **7.25%** |
 

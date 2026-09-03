@@ -57,7 +57,7 @@ Search. Filtering is `STORY-0002-02-02`; free-text search arrives with the API i
 ### Notes
 
 The substitution distinction is the whole story. A Latte is not dairy-free, but a Latte with oat milk is —
-and Queen Bee is specified with oat milk by default. Collapsing those cases produces an agent that either
+and Honeycomb is specified with oat milk by default. Collapsing those cases produces an agent that either
 refuses valid orders or recommends unsafe ones.
 
 ### Out of scope

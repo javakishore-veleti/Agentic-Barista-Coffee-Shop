@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="Architecture plan for the Brakeman's agentic coffee shop platform.">
+<meta name="description" content="Architecture plan for the AKIV Barista Coffee Shop Agentic Platform.">
 <style>
   html { color-scheme: light dark; }
   body { margin: 0; font-family: system-ui, sans-serif; }
@@ -13,7 +13,7 @@
 </style>
 </head>
 <body>
-<title>Brakeman's Agent Platform</title>
+<title>AKIV Barista Coffee Shop Agentic Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -362,7 +362,7 @@
 <div class="shell">
 
   <header class="masthead">
-    <h1>Brakeman's<span>Agent Platform</span></h1>
+    <h1>AKIV Barista<span>Agentic Platform</span></h1>
     <div class="stamp">
       <b>Architecture plan</b> — rev A<br>
       1,000 branches · one menu · one ledger<br>
@@ -371,7 +371,7 @@
   </header>
 
   <p class="dek">
-    A platform for a working coffee shop, built as <strong>three independent chat surfaces</strong> — coffee
+    A platform for a 1,000-branch coffee chain, built as <strong>three independent chat surfaces</strong> — coffee
     ordering, private events, gift cards — each on the agent framework its control flow actually calls for, sitting
     on top of <strong>ordinary FastAPI domain services</strong> that own all persistence. Every provider and every
     store is an <code>.env</code> switch, and every switch is flipped in exactly one place.
@@ -405,14 +405,14 @@
     <section id="scope">
       <h2><span class="kicker">01 — Scope</span>What we are actually building</h2>
       <p>
-        A customer-facing coffee shop platform for Brakeman's with three agentic capabilities, each a separate
+        A customer-facing coffee shop platform for AKIV Coffee with three agentic capabilities, each a separate
         conversation with its own memory, its own tools, and its own failure modes:
       </p>
       <ul class="plain">
         <li><strong>Coffee ordering</strong> — browse and order from the live menu. Grounded in the real catalog:
-          Brakeman's Blend (plum, brown sugar, molasses; Guatemala and Colombia), the Queen Bee iced honey cinnamon
-          oat latte, LoCoMocha, Ticket to London, Slow-berry Matcha, Barb's Butter Bars in Oreo or Almond Joy,
-          rotating Lenny Boy Kombucha, plus retail — 12&nbsp;oz whole bean at $17.50, mugs $12–$30, long sleeve at $24.</li>
+          AKIV House Blend (cocoa, toasted almond and dried cherry; Colombia and Honduras), the Honeycomb iced honey cinnamon
+          oat latte, Coconut Mocha, Earl Grey Fog, Strawberry Honey Matcha, Butter Bars in two flavours,
+          a rotating local kombucha, plus retail — 12&nbsp;oz whole bean at $17.50, mugs $12–$30, long sleeve at $24.</li>
         <li><strong>Private events</strong> — a booking conversation with real constraints: weeknights and Sundays only,
           2&nbsp;hours at $300 on a weeknight (7–9pm), $400 for 2&nbsp;hours or $500 for 3&nbsp;hours on a Sunday,
           plus 1&nbsp;hour setup and 30&nbsp;minutes cleanup that must be reserved alongside the event window.</li>
@@ -568,7 +568,7 @@
     <section id="layout">
       <h2><span class="kicker">03 — Layout</span>Repository layout</h2>
       <pre><span class="c">Middleware/</span>
-  shared/                  <span class="c"># installable pkg: brakemans-common (llm, repo, telemetry, config)</span>
+  shared/                  <span class="c"># installable pkg: akiv-common (llm, repo, telemetry, config)</span>
   gateway/                 <span class="c"># BFF: token verification, session, SSE fan-out, tracing</span>
   authz-api/               <span class="c"># FastAPI · users, roles, branch scope, token issue/verify</span>
   catalog-api/             <span class="c"># FastAPI · menu, sizes, mods, allergens, retail</span>
@@ -874,11 +874,11 @@
       <pre><span class="c"># Middleware/catalog-api/.env</span>
 <span class="k">CATALOG_STORE</span>=hybrid          <span class="c"># postgres | json | hybrid</span>
 <span class="k">CATALOG_JSON_ROOT</span>=/data/coffee
-<span class="k">CATALOG_PG_DSN</span>=postgresql://brakemans@postgres:5432/catalog
+<span class="k">CATALOG_PG_DSN</span>=postgresql://akiv@postgres:5432/catalog
 
 <span class="c"># Middleware/events-api/.env</span>
 <span class="k">EVENTS_STORE</span>=json            <span class="c"># event definitions from files…</span>
-<span class="k">EVENTS_BOOKING_PG_DSN</span>=postgresql://brakemans@postgres:5432/events
+<span class="k">EVENTS_BOOKING_PG_DSN</span>=postgresql://akiv@postgres:5432/events
                               <span class="c">// …bookings always Postgres. See rule below.</span></pre>
       <div class="tablewrap">
         <table>
@@ -940,9 +940,9 @@
         which identity provider is in play, and it is configured exactly like the other two seams.
       </p>
       <pre><span class="k">AUTH_PROVIDER</span>=basic          <span class="c"># basic | cognito | entra_id | gcp_identity</span>
-<span class="k">AUTH_PG_DSN</span>=postgresql://brakemans@postgres:5432/authz
+<span class="k">AUTH_PG_DSN</span>=postgresql://akiv@postgres:5432/authz
 <span class="k">AUTH_TOKEN_TTL</span>=3600
-<span class="k">AUTH_ISSUER</span>=https://auth.brakemans.local</pre>
+<span class="k">AUTH_ISSUER</span>=https://auth.akiv.local</pre>
       <div class="tablewrap">
         <table>
           <thead><tr><th>Value</th><th>Where identity lives</th><th>authz-api's job</th></tr></thead>
@@ -1032,7 +1032,7 @@
     <section id="branches">
       <h2><span class="kicker">09 — Domain</span>One menu, a thousand branches, a thousand calendars</h2>
       <p>
-        Brakeman's runs <strong>1,000 branches across the United States</strong>, and the three domains do not
+        AKIV Coffee runs <strong>1,000 branches across the United States</strong>, and the three domains do not
         scale the same way across them. This distinction decides whether the corpus is a modest indexing job or
         an eye-watering one.
       </p>
@@ -1042,7 +1042,7 @@
           <tbody>
             <tr><td><strong>Menu</strong></td><td>No — brand-wide and identical</td><td>Only <em>availability</em>, the daily rotation (today's pastry, today's kombucha), and occasional regional price adjustment</td></tr>
             <tr><td><strong>Events</strong></td><td>Yes — substantially</td><td>Branch size tier sets capacity, which event types it can host, and what it can afford to staff — and therefore its rate card and durations</td></tr>
-            <tr><td><strong>Gift cards</strong></td><td>No — and must not</td><td>A card bought in Matthews has to redeem in Charlotte. Branch is an attribute of a transaction, never a partition of the balance</td></tr>
+            <tr><td><strong>Gift cards</strong></td><td>No — and must not</td><td>A card bought at the reference branch has to redeem in Charlotte. Branch is an attribute of a transaction, never a partition of the balance</td></tr>
           </tbody>
         </table>
       </div>
@@ -1102,7 +1102,7 @@
           leaves it alone. Without this the first exception becomes a hardcoded branch id in a query.
         </p>
         <p>
-          Start with four tiers and let the table prove or disprove that number. Matthews seeds the mid tier:
+          Start with four tiers and let the table prove or disprove that number. the reference branch seeds the mid tier:
           weeknight 2h $300, Sunday 2h $400 and 3h $500, 60 minutes setup, 30 minutes cleanup — real rows in
           <code>event_rate_card</code>, not constants in code.
         </p>
@@ -1138,12 +1138,11 @@
         <p>
           Every conversation carries a <code>branch_id</code>, and it is a <strong>required</strong> parameter on
           nearly every MCP tool. A tool called without one <strong>fails loudly rather than defaulting to a
-          flagship branch</strong> — a barista that quietly answers from Matthews' availability while the customer
+          flagship branch</strong> — a barista that quietly answers from the flagship's availability while the customer
           is standing in Raleigh is worse than one that asks which store.
         </p>
         <p>
-          The reference branch in the fixtures is modelled on a real independent shop in Matthews, NC, whose
-          published figures seed the mid tier — 2 hours at $300 on a weeknight,
+          The reference branch in the fixtures is the seeded flagship, whose figures seed the mid tier — 2 hours at $300 on a weeknight,
           $400 for 2 hours or $500 for 3 on a Sunday, 1 hour setup and 30 minutes cleanup — seed the mid-size tier
           the other 999 derive from.
         </p>
@@ -1203,10 +1202,10 @@
 <span class="k">branch_profile</span>     … · jurisdiction_id                <span class="c"># from the tables above</span></pre>
       <div class="tablewrap">
         <table>
-          <thead><tr><th>Matthews, NC — seed data</th><th>Prepared drink</th><th>Whole bean / merchandise</th></tr></thead>
+          <thead><tr><th>Reference jurisdiction — seed data</th><th>Prepared drink</th><th>Whole bean / merchandise</th></tr></thead>
           <tbody>
             <tr><td>NC state</td><td class="num mono">4.75%</td><td class="num mono">4.75%</td></tr>
-            <tr><td>Mecklenburg County + transit</td><td class="num mono">2.50%</td><td class="num mono">2.50%</td></tr>
+            <tr><td>County + transit</td><td class="num mono">2.50%</td><td class="num mono">2.50%</td></tr>
             <tr><td>Prepared food &amp; beverage</td><td class="num mono">1.00%</td><td class="num mono">—</td></tr>
             <tr><td><strong>Combined</strong></td><td class="num mono"><strong>8.25%</strong></td><td class="num mono"><strong>7.25%</strong></td></tr>
           </tbody>
@@ -1314,7 +1313,7 @@
 
 <span class="c">→</span>  { "message": "something iced and not too sweet", "context": {...} }
 
-<span class="c">←</span>  event: token        { "text": "The Queen Bee is" }
+<span class="c">←</span>  event: token        { "text": "The Honeycomb is" }
     event: tool_call    { "name": "search_menu", "args": {...} }
     event: tool_result  { "name": "search_menu", "ms": 42, "n": 3 }
     event: <span class="w">ui_action</span>   { "kind": "order_summary", "payload": {...} }
@@ -1616,7 +1615,7 @@ AWS-0900-Setup-All.yml            AWS-0999-Destroy-All.yml
           <div class="n">02</div>
           <div>
             <h3>Corpus generator and indexer</h3>
-            <p><code>Seed/generate_shards.py</code> produces the real 300k-file corpus from the actual Brakeman's menu with realistic variation. The indexer walks it. Now you have honest numbers for dedupe ratio, index size, and embedding cost before committing to a provider.</p>
+            <p><code>Seed/generate_shards.py</code> produces the 300k-file corpus from the seeded AKIV Coffee menu with realistic variation. The indexer walks it. Now you have honest numbers for dedupe ratio, index size, and embedding cost before committing to a provider.</p>
           </div>
         </div>
         <div class="phase">
@@ -1677,7 +1676,7 @@ AWS-0900-Setup-All.yml            AWS-0999-Destroy-All.yml
         </div>
         <div class="q">
           <span class="tag">Decide</span>
-          <p><strong>Initial tier bands.</strong> Four tiers is the starting assumption and the table can prove it wrong, but the seat thresholds themselves still need a first pass from someone who knows the estate. Matthews anchors the middle; the boundaries are a product call, not a schema one.</p>
+          <p><strong>Initial tier bands.</strong> Four tiers is the starting assumption and the table can prove it wrong, but the seat thresholds themselves still need a first pass from someone who knows the estate. The reference branch anchors the middle; the boundaries are a product call, not a schema one.</p>
         </div>
         <div class="q">
           <span class="tag">Risk</span>
@@ -1704,7 +1703,7 @@ AWS-0900-Setup-All.yml            AWS-0999-Destroy-All.yml
   </main>
 
   <footer>
-    <span>Brakeman's Coffee &amp; Supply — agent platform</span>
+    <span>AKIV Barista Coffee Shop Agentic Platform</span>
     <span>Architecture plan · rev A · pre-implementation</span>
   </footer>
 

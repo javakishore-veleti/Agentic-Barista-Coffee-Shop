@@ -47,7 +47,7 @@ Containerisation of the portals; that is `STORY-0005-04-03`.
 
 ### Acceptance criteria
 
-1. **Given** any customer route, **when** it renders, **then** the shell shows the Brakeman's mark,
+1. **Given** any customer route, **when** it renders, **then** the shell shows the AKIV Coffee mark,
    primary navigation, and a footer carrying **the selected branch's** address, phone and today's hours.
    No address is hardcoded anywhere in the shell.
 2. **Given** today is Sunday, **when** the footer renders, **then** it shows the shop as closed rather

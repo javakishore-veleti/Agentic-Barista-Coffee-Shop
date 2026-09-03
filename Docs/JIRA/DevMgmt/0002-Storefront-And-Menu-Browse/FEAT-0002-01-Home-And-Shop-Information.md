@@ -12,7 +12,7 @@ is it open, and how do I get there.
 ## STORY-0002-01-01 — Landing page
 
 **As a** first-time visitor
-**I want** to immediately understand what Brakeman's is and what I can do here
+**I want** to immediately understand what AKIV Coffee is and what I can do here
 **So that** I can decide whether to order, book, or just get directions.
 
 ### Acceptance criteria
@@ -68,16 +68,16 @@ Live "how busy is it" signals; an hours-editing screen (that is `FEAT-0004-02`).
 ## STORY-0002-01-03 — Menu fixture
 
 **As a** developer building menu screens
-**I want** a fixture file holding the real Brakeman's menu in the shape the catalog API will return
+**I want** a fixture file holding the real AKIV Coffee menu in the shape the catalog API will return
 **So that** UI work proceeds before the API exists and the API inherits a shape proven by real screens.
 
 ### Acceptance criteria
 
 1. **Given** the fixture, **when** it is inspected, **then** it contains every item on the current
-   Brakeman's menu, including Brakeman's Blend and Feature Roast drip, Latte, Lavender Latte, Chai, Cold Brew,
-   Nitro, Mocha, Cappuccino, Hot Chocolate, Queen Bee, LoCoMocha, Café Au Lait, Americano, Matcha Latte,
-   Ticket to London, the tea list, Ice Box shakes and smoothies, Slow-berry Matcha, rotating pastries,
-   Barb's Butter Bars, Lenny Boy Kombucha, and retail (12oz whole bean $17.50, mugs $12–$30, shirt $24).
+   AKIV Coffee menu, including AKIV House Blend and Feature Roast drip, Latte, Lavender Latte, Chai, Cold Brew,
+   Nitro, Mocha, Cappuccino, Hot Chocolate, Honeycomb, Coconut Mocha, Café Au Lait, Americano, Matcha Latte,
+   Earl Grey Fog, the tea list, Ice Box shakes and smoothies, Strawberry Honey Matcha, rotating pastries,
+   Butter Bars, local kombucha, and retail (12oz whole bean $17.50, mugs $12–$30, shirt $24).
 2. **Given** an item available hot or iced, **when** it is represented, **then** temperature is a modifier
    with its own availability, not two separate items.
 3. **Given** an item with a rotating selection (pastries, kombucha, tea), **when** it is represented, **then**
@@ -104,7 +104,7 @@ Generating the 100k-shard corpus; that is EPIC-0010. This is one honest file.
 ## STORY-0002-01-04 — Branch selection
 
 **As a** customer of a chain with 1,000 branches
-**I want** the site to know which Brakeman's I mean
+**I want** the site to know which AKIV Coffee I mean
 **So that** I see what is actually available where I am going.
 
 ### Acceptance criteria
@@ -116,7 +116,7 @@ Generating the 100k-shard corpus; that is EPIC-0010. This is one honest file.
 3. **Given** a chosen branch, **when** I navigate or reload, **then** the choice persists and is visible in the
    shell at all times, with a one-tap way to change it.
 4. **Given** a chosen branch, **when** it is displayed, **then** its own hours, address and parking notes are
-   shown — not the Matthews defaults.
+   shown — not the the reference branch defaults.
 5. **Given** a branch change with a non-empty cart, **when** I confirm the change, **then** lines unavailable at
    the new branch are flagged before the switch completes rather than silently dropped.
 
@@ -127,8 +127,8 @@ required parameter on the MCP tools is that a confidently wrong answer about ava
 question — the UI must hold the same line.
 
 Hours, address and parking are per branch from this story onward — there is no default branch and no
-fallback address. The fixture's reference branch (Mon–Fri 6am–7pm, Sat 7am–7pm, Sun closed) is modelled on a
-real independent shop and is seed data, not the platform's identity.
+fallback address. The fixture's reference branch (Mon–Fri 6am–7pm, Sat 7am–7pm, Sun closed) is seed data, not the
+platform's identity.
 
 ### Out of scope
 

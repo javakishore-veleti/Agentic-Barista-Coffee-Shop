@@ -1,6 +1,6 @@
-# Brakeman's Agent Platform — Development Management
+# AKIV Barista Coffee Shop Agentic Platform — Development Management
 
-Product backlog for the Brakeman's Coffee & Supply agentic platform, written product-owner-first
+Product backlog for the AKIV Coffee agentic platform, written product-owner-first
 and shaped so that each **story** is a self-contained input to OpenSpec.
 
 ## How this folder is organised

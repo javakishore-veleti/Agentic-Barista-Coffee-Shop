@@ -4,7 +4,7 @@
 
 ## Description
 
-`Middleware/shared` (installable as `brakemans-common`) plus the scaffold every FastAPI service starts from.
+`Middleware/shared` (installable as `akiv-common`) plus the scaffold every FastAPI service starts from.
 Its hardest constraint is what it must *not* contain.
 
 ---

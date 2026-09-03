@@ -74,7 +74,7 @@ Automatic collection of branch metrics from an external system.
 
 1. **Given** the rate card screen, **when** it loads, **then** it shows price by tier, day type (weeknight or
    Sunday) and duration, with setup and cleanup minutes.
-2. **Given** the mid tier, **when** it loads, **then** it is seeded with the Matthews figures — weeknight 2h
+2. **Given** the mid tier, **when** it loads, **then** it is seeded with the the reference branch figures — weeknight 2h
    $300, Sunday 2h $400, Sunday 3h $500, 60 minutes setup, 30 minutes cleanup — as editable rows.
 3. **Given** an edit, **when** saved, **then** it is effective-dated and existing confirmed bookings keep their
    agreed price.
