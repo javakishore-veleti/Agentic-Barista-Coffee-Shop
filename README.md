@@ -5,8 +5,8 @@
 </picture>
 
 <p align="center">
-  <b>Three agentic surfaces for a 1,000-branch coffee chain — coffee ordering, private events, and gift cards —<br>
-  each on a different framework, over pluggable providers and pluggable stores.</b>
+  <b>Customers order coffee, book private events and buy gift cards by conversation —<br>
+  grounded in what each of 1,000 branches actually has, today.</b>
 </p>
 
 <p align="center">
