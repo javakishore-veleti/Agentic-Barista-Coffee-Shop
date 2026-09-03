@@ -63,24 +63,23 @@ Three chat windows, no cross-talk between them, each with its own memory and its
 
 ## Business architecture
 
-Deliberately **not** a coffee-shop capability model — roasting, staffing and store operations are out of
-scope. This describes the capabilities of *the agentic platform itself*: what it can do, what it offers as a
-service, how value moves through it, and where its domain boundaries sit.
+Scope is the agentic platform: the services it exposes, the capabilities it holds, the value streams it
+delivers, and its domain boundaries. Retail operations — roasting, supply chain, staffing and store
+management — sit outside this boundary and are treated as existing business functions.
 
 ### Business services
 
-What the platform exposes as contracted, independently consumable services. Each has a named consumer and a
-published contract — which is what makes it a service rather than a component.
+Each service has a named consumer and a published contract, and can be consumed independently of the others.
 
 | Business service | Consumer | Published contract | Value it carries |
 |---|---|---|---|
-| **Grounded Conversation** | Customers, on three surfaces | SSE chat envelope | An answer that traces to a system of record, or no answer at all |
-| **Tool Catalog** | Agents, and any external MCP client | MCP tool schemas, versioned | One definition of a capability, reusable by any framework |
-| **Authority** | Every service and agent | Internal principal | One identity shape from four providers; scope enforced at the API |
-| **Deterministic Commerce** | Portals, agents, order pipeline | Priced order document | One authoritative answer to "what does this cost" |
-| **Human Decision** | Branch and regional staff | Durable decision events | A person stays in the loop without stalling the machine |
-| **Model Portability** | Operators | Provider config + conformance certificate | Switching vendor is a variable, not a project |
-| **Agent Assurance** | Engineering and product | Traces, evals, cost ledger | Behaviour is measurable, so regressions fail a build not a demo |
+| **Grounded Conversation** | Customers, on three surfaces | SSE chat envelope | Answers that trace to a system of record; a refusal where no source exists |
+| **Tool Catalog** | Agents, and any external MCP client | MCP tool schemas, versioned | A single definition of each capability, consumable by any framework |
+| **Authority** | Every service and agent | Internal principal | A single identity shape across four providers, with scope enforced at the API |
+| **Deterministic Commerce** | Portals, agents, order pipeline | Priced order document | A single authoritative price for a given cart, branch and date |
+| **Human Decision** | Branch and regional staff | Durable decision events | Staff decisions recorded durably and consumable asynchronously |
+| **Model Portability** | Operators | Provider config + conformance certificate | Provider changes are configuration changes, within a certified set |
+| **Agent Assurance** | Engineering and product | Traces, evals, cost ledger | Measurable behaviour, so regressions surface in CI |
 
 ### Business capabilities
 
@@ -98,15 +97,16 @@ Stable abilities, independent of how they are implemented. Level 1 in bold, leve
 | **Agent Assurance** | Trace lineage · behavioural evaluation · cost accounting · prompt and configuration versioning |
 
 > [!NOTE]
-> **Two capabilities do the load-bearing work.** *Grounding & Truth Assurance* is what separates this from a
-> chatbot in front of a database — every claim traces to a tool result in the same turn, enforced by a check
-> rather than a prompt. *Tool Governance* is what stops three frameworks becoming three divergent
-> implementations of the same capability. Everything else is table stakes; those two are the platform.
+> **Grounding & Truth Assurance** and **Tool Governance** carry constraints the other capabilities depend on.
+> Grounding requires that every factual and monetary claim trace to a tool result in the same turn, enforced
+> by a response check rather than by prompt instruction. Tool Governance requires that a capability be
+> specified once and consumed unchanged by all three frameworks. Relaxing either changes the guarantees
+> available to every capability above it.
 
 ### Value streams
 
-End-to-end, stage-based, each ending in value to a named stakeholder. The last two are internal — and they
-are the ones that make this an *agentic platform* rather than three applications that happen to use models.
+Each stream is end-to-end and ends in value to a named stakeholder. Three are customer-facing; the last two
+are internal to platform operation.
 
 **Conversation → Fulfilled order** *(customer)*
 ```
@@ -120,8 +120,8 @@ Establish context → Qualify requirements → Check real availability → Quote
     → ⏸ escalate for human decision → Resume → Confirm or decline
 ```
 Enabled by: Human-in-the-Loop Orchestration · Grounding · Authority
-The pause is not a failure state. It is the value stream crossing from machine to human and back, days later
-if necessary, without losing the thread.
+The escalation stage is a defined state rather than an error path: the stream crosses from automated
+handling to a human decision and resumes from checkpointed state afterwards, potentially days later.
 
 **Intent → Delivered gift** *(purchaser + recipient)*
 ```
@@ -135,7 +135,8 @@ Identify capability → Define once → Classify read or write → Certify schem
     → Attach to agents → Observe → Version
 ```
 Enabled by: Tool Governance · Agent Assurance
-This is the stream that keeps `search_menu` from being written three times in three dialects.
+Without this stream, a capability such as `search_menu` is implemented separately in each framework and the
+implementations diverge.
 
 **Candidate model → Certified provider** *(operators)*
 ```
@@ -143,7 +144,8 @@ Nominate candidate → Run conformance suite → Compare against threshold → C
     → Configure per service → Monitor drift → Re-certify
 ```
 Enabled by: Model & Vendor Portability · Agent Assurance
-A provider that has not completed this stream is *unsupported*, and services refuse to start with it.
+A provider that has not completed this stream is unsupported, and services refuse to start when configured
+with it.
 
 ### Context map
 
@@ -186,8 +188,8 @@ flowchart TB
 
 | Pattern | Where it applies | What it means |
 |---|---|---|
-| **Conformist** | Conversation contexts → Tool Governance | Agents accept published tool schemas as given. They do not negotiate a bespoke shape, which is exactly why one definition serves ADK, LangGraph and LangChain |
-| **Anticorruption layer** | Tool Governance → domain contexts | MCP translates domain APIs into agent-facing tools. Domain models never leak into a prompt, and model-shaped concerns never leak into a domain |
+| **Conformist** | Conversation contexts → Tool Governance | Agents accept published tool schemas as given rather than defining their own, so one definition serves ADK, LangGraph and LangChain |
+| **Anticorruption layer** | Tool Governance → domain contexts | MCP translates domain APIs into agent-facing tools. Domain models are not exposed to a prompt, and model-shaped concerns are not introduced into a domain |
 | **Open host / published language** | Domain contexts upstream | Each domain publishes an HTTP contract and a shared error envelope, consumed identically by MCP, the portals and any future client |
 | **Shared kernel** | Identity and Tenancy → everything | The internal principal and `branch_id` are small, jointly-owned models. Changing either is a coordinated change, by design |
 | **Customer / supplier** | Corpus & Index → Catalog | The indexer is upstream and serves a downstream consumer whose query needs drive it |
@@ -196,12 +198,11 @@ flowchart TB
 > **Three boundaries that must never be merged**, each for a different reason:
 >
 > 1. **The three conversation contexts share no model.** Separate sessions, separate memory, separate failure
->    modes. Merging them is how a birthday-party enquiry contaminates a coffee order.
-> 2. **Tool Governance never reaches past a domain API into storage.** The anticorruption layer is the whole
->    point; an MCP server holding a connection string has become a second, undisciplined data plane.
-> 3. **The gift card ledger is never partitioned by branch.** Branch is an attribute of a movement. Partition
->    it and a card bought at one branch stops working at another, which is the one thing a customer will not
->    forgive.
+>    modes. Merging them allows context established in one domain to affect responses in another.
+> 2. **Tool Governance does not reach past a domain API into storage.** An MCP server holding a database
+>    connection constitutes a second data plane, outside the constraints the domain API enforces.
+> 3. **The gift card ledger is not partitioned by branch.** Branch is an attribute of a movement. Partitioning
+>    it means a card bought at one branch is not redeemable at another.
 
 
 ---
