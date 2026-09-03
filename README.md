@@ -81,6 +81,91 @@ Each service has a named consumer and a published contract, and can be consumed 
 | **Model Portability** | Operators | Provider config + conformance certificate | Provider changes are configuration changes, within a certified set |
 | **Agent Assurance** | Engineering and product | Traces, evals, cost ledger | Measurable behaviour, so regressions surface in CI |
 
+#### What these names mean
+
+**Grounded Conversation** — *grounded* is a property of each claim, not of the conversation's style. A claim
+is grounded when it traces to a retrieval or tool result produced in the same turn from a system of record.
+
+- Grounded, and therefore assertable: whether an item exists; whether it is available at a given branch on a
+  given date; its allergens and available milks; its price; an order total; a card balance; a slot's
+  availability; an event rate.
+- Not grounded, and therefore not assertable: anything no system records — preparation method,
+  cross-contamination risk, what is popular, whether staff recommend something, availability next week. The
+  response states that it is not known and, where relevant, directs the customer to staff.
+- Enforced by a response check comparing claims against that turn's tool results. A response containing an
+  unsupported claim is blocked and regenerated, rather than discouraged by prompt wording.
+
+**Tool Catalog** — the name is taken from the implementation and does read as technical. In business terms it
+is the governed register of actions the platform permits an automated agent to take: each action has an
+owner, a version, a stated contract, and a read-or-write classification that determines which agents may hold
+it at all. *Agent Action Governance* would describe the same service without naming the mechanism, if a
+business-facing label is preferred.
+
+**Authority** — the right to perform a specific action on a specific branch's data. Distinct from
+authentication, which establishes identity only.
+
+- Whose authority: the human in the conversation, customer or staff. An agent holds none of its own and
+  carries no service account, so automation is not a route to permissions no person has.
+- Why it is separate: authority is checked at the domain API, independently of which tools an agent was
+  given. Capability answers *was this action available to the agent*; authority answers *may this person take
+  it, at this branch*. Both are checked; both must pass.
+- What it governs: branch scope, staff role, realm separation between staff and customer, and the price
+  policy bands that determine whether an override applies immediately or escalates for approval.
+
+**Deterministic Commerce** — *deterministic* means the same inputs produce the same output every time, from a
+single implementation, with no model involved in the calculation.
+
+- Deterministic: unit price resolution including any override effective on that date; modifier deltas; line
+  subtotals; discount application in stored sequence; tax resolution against a versioned rate table; all
+  stored totals; idempotent submission.
+- Not deterministic, by design: which items an agent proposes, how it describes an order, and when it asks a
+  clarifying question. Those are judgements and are the model's work.
+- The boundary between the two defines the service: a model decides what to propose; it never computes what
+  that costs.
+- Determinism also holds over time. Because totals and the tax `rate_version` are stored rather than derived
+  on read, an order priced two years ago reprices identically today.
+
+**Human Decision** — a staff judgement recorded as a durable event rather than delivered as a callback, so it
+survives the agent being unavailable and can be consumed whenever the conversation resumes.
+
+**Model Portability** — the name is technical for the same reason *Tool Catalog* is: *model* names the
+component rather than the concern. The business concern is **supplier independence** — the ability to change
+AI supplier without re-engineering the applications that depend on one. *Supplier Independence* would be the
+business-facing label.
+
+- What it covers: chat provider and embedding provider are separately switchable per service, so a change of
+  cloud or of commercial terms is a configuration change.
+- What bounds it: portability applies only within the set of providers that has passed tool-calling
+  conformance. An uncertified provider is not available for use, so this is not a claim that any model will
+  work — it is a claim about a known, tested set.
+- Why it is a business service rather than an implementation detail: it determines whether a supplier's
+  pricing change, deprecation notice or regional availability is a procurement decision or a project.
+
+**Agent Assurance** — assurance that responses are *correct*, as distinct from assurance that the system
+*ran*. Conventional monitoring answers the second question and cannot answer the first.
+
+An agent can execute without fault — no errors, normal latency, every dependency healthy — and still
+recommend an item the branch does not stock, or state a balance that does not exist. The response is
+well-formed and returns 200. Nothing in latency, error-rate or throughput monitoring detects it.
+
+Four properties of an agent create that gap, and each is what a part of this service exists to cover:
+
+| Property | Consequence | What assurance adds |
+|---|---|---|
+| Non-deterministic output | One passing run is not evidence of correctness | Repeated behavioural evaluation reporting a rate, not a pass |
+| Correctness is semantic | The defect sits in the content of a valid response | Evals asserting which items were named and whether figures trace to a tool result |
+| Behaviour changes with no code change | A supplier updates a model and output shifts while version control shows nothing | Provider conformance certification and re-certification on drift |
+| Cost varies per request | Spend is a function of conversation shape, not request count | Cost accounting per turn, surface and provider |
+
+Part of this service is ordinary observability that any system needs — request lineage across services, and
+cost accounting. Remove the agents and that part remains. What would not remain, and what has no equivalent
+in a deterministic system, is the evaluation and attribution layer: behavioural evals in CI, guardrail block
+rates as a leading signal of grounding regression, and knowing which prompt version, model and toolset
+produced a specific turn.
+
+Without it, a grounding regression is reported by a customer rather than caught by a build.
+
+
 ### Business capabilities
 
 Stable abilities, independent of how they are implemented. Level 1 in bold, level 2 beneath.
@@ -102,6 +187,27 @@ Stable abilities, independent of how they are implemented. Level 1 in bold, leve
 > by a response check rather than by prompt instruction. Tool Governance requires that a capability be
 > specified once and consumed unchanged by all three frameworks. Relaxing either changes the guarantees
 > available to every capability above it.
+
+#### In plain terms
+
+**Grounding.** The assistant may not tell a customer anything it did not look up while writing that reply.
+If someone asks whether a drink is dairy-free, it has to fetch that item and read its allergen list. It
+cannot answer from general knowledge about lattes, and it cannot reuse an answer from earlier in the same
+conversation — a price or a card balance may have changed since. A separate check reads the finished reply
+before it is sent and blocks it if it contains a fact or a figure that did not come back from a lookup.
+Telling a model to "only use the menu" is an instruction it can fail to follow; blocking the reply is not.
+
+**Tool Governance.** "Look up the menu" is written down once, with one set of inputs and outputs, and all
+three assistants use that same definition. If it were written three times — once for each assistant — then a
+change such as adding a dietary filter would have to be made in three places. The first time one was missed,
+two assistants would give different answers to the same question. Writing it once removes that possibility
+instead of relying on everyone remembering.
+
+**Why these two come first.** Everything else here — taking an order, quoting an event, issuing a gift card —
+assumes the answers are true and that the three assistants behave the same way as each other. These two are
+limits on what the system is allowed to do, rather than things it does. Weaken either one and the features
+built on top stop being guaranteed and start depending on the model behaving well on the day.
+
 
 ### Value streams
 
