@@ -32,16 +32,17 @@
 | | Section | What's in it |
 |---|---|---|
 | **01** | [What this is](#what-this-is) | The shop, the three surfaces, the real menu |
-| **02** | [Architecture](#architecture) | The two planes and the one rule between them |
-| **03** | [The three agents](#the-three-agents) | Why ADK, why LangGraph, why LangChain |
-| **04** | [The MCP tool layer](#the-mcp-tool-layer) | One tool definition, three frameworks |
-| **05** | [Configuration seams](#configuration-seams) | Provider, store and identity — all per-service |
-| **06** | [Branches and the order model](#branches-and-the-order-model) | 1,000 branches, one menu, a real commerce document |
-| **07** | [The $1 budget](#the-1-budget) | Every default chosen for $0 standing cost |
-| **08** | [Repository layout](#repository-layout) | Where everything lives |
-| **09** | [Quick start](#quick-start) | `docker-all-up.sh` and what it does |
-| **10** | [Cloud provisioning](#cloud-provisioning) | Numbered, manually-triggered GitHub Actions |
-| **11** | [How we build](#how-we-build-backlog--openspec) | The backlog, and the OpenSpec pipeline |
+| **02** | [Business architecture](#business-architecture) | Services, capabilities, value streams, context map |
+| **03** | [Architecture](#architecture) | The two planes and the one rule between them |
+| **04** | [The three agents](#the-three-agents) | Why ADK, why LangGraph, why LangChain |
+| **05** | [The MCP tool layer](#the-mcp-tool-layer) | One tool definition, three frameworks |
+| **06** | [Configuration seams](#configuration-seams) | Provider, store and identity — all per-service |
+| **07** | [Branches and the order model](#branches-and-the-order-model) | 1,000 branches, one menu, a real commerce document |
+| **08** | [The $1 budget](#the-1-budget) | Every default chosen for $0 standing cost |
+| **09** | [Repository layout](#repository-layout) | Where everything lives |
+| **10** | [Quick start](#quick-start) | `docker-all-up.sh` and what it does |
+| **11** | [Cloud provisioning](#cloud-provisioning) | Numbered, manually-triggered GitHub Actions |
+| **12** | [How we build](#how-we-build-backlog--openspec) | The backlog, and the OpenSpec pipeline |
 
 ---
 
@@ -57,6 +58,151 @@ The seeded reference branch supplies the menu, hours and event rates the fixture
 | **Gift cards** | Buys, reloads, checks balance | $5 / $10 / $20 / $50 / custom, individual or pooled group card, delivered by SMS or email, now or scheduled |
 
 Three chat windows, no cross-talk between them, each with its own memory and its own failure modes.
+
+---
+
+## Business architecture
+
+Deliberately **not** a coffee-shop capability model — roasting, staffing and store operations are out of
+scope. This describes the capabilities of *the agentic platform itself*: what it can do, what it offers as a
+service, how value moves through it, and where its domain boundaries sit.
+
+### Business services
+
+What the platform exposes as contracted, independently consumable services. Each has a named consumer and a
+published contract — which is what makes it a service rather than a component.
+
+| Business service | Consumer | Published contract | Value it carries |
+|---|---|---|---|
+| **Grounded Conversation** | Customers, on three surfaces | SSE chat envelope | An answer that traces to a system of record, or no answer at all |
+| **Tool Catalog** | Agents, and any external MCP client | MCP tool schemas, versioned | One definition of a capability, reusable by any framework |
+| **Authority** | Every service and agent | Internal principal | One identity shape from four providers; scope enforced at the API |
+| **Deterministic Commerce** | Portals, agents, order pipeline | Priced order document | One authoritative answer to "what does this cost" |
+| **Human Decision** | Branch and regional staff | Durable decision events | A person stays in the loop without stalling the machine |
+| **Model Portability** | Operators | Provider config + conformance certificate | Switching vendor is a variable, not a project |
+| **Agent Assurance** | Engineering and product | Traces, evals, cost ledger | Behaviour is measurable, so regressions fail a build not a demo |
+
+### Business capabilities
+
+Stable abilities, independent of how they are implemented. Level 1 in bold, level 2 beneath.
+
+| Capability | What it means here |
+|---|---|
+| **Conversational Engagement** | Intent capture · surface isolation · session continuity · contextual entry from any screen |
+| **Grounding & Truth Assurance** | Retrieval grounding · provenance enforcement · honest refusal · monetary provenance |
+| **Tool Governance** | Define-once tool specification · read/write capability partitioning · schema conformance · tool discovery and versioning |
+| **Authority & Scope Enforcement** | Principal propagation · branch scope · realm separation · policy bands and approval trails |
+| **Deterministic Commerce** | Pricing authority · multi-jurisdiction tax resolution · order document integrity · idempotent transaction |
+| **Human-in-the-Loop Orchestration** | Workflow checkpointing · interrupt and resume · staff decisioning · durable handoff across downtime |
+| **Model & Vendor Portability** | Provider abstraction · conformance certification · embedding-space stewardship · cost governance |
+| **Agent Assurance** | Trace lineage · behavioural evaluation · cost accounting · prompt and configuration versioning |
+
+> [!NOTE]
+> **Two capabilities do the load-bearing work.** *Grounding & Truth Assurance* is what separates this from a
+> chatbot in front of a database — every claim traces to a tool result in the same turn, enforced by a check
+> rather than a prompt. *Tool Governance* is what stops three frameworks becoming three divergent
+> implementations of the same capability. Everything else is table stakes; those two are the platform.
+
+### Value streams
+
+End-to-end, stage-based, each ending in value to a named stakeholder. The last two are internal — and they
+are the ones that make this an *agentic platform* rather than three applications that happen to use models.
+
+**Conversation → Fulfilled order** *(customer)*
+```
+Establish context → Understand need → Ground in reality → Compose & price → Confirm → Commit → Fulfil & track
+```
+Enabled by: Conversational Engagement · Grounding · Deterministic Commerce · Authority
+
+**Inquiry → Confirmed booking** *(customer + branch staff)*
+```
+Establish context → Qualify requirements → Check real availability → Quote → Hold
+    → ⏸ escalate for human decision → Resume → Confirm or decline
+```
+Enabled by: Human-in-the-Loop Orchestration · Grounding · Authority
+The pause is not a failure state. It is the value stream crossing from machine to human and back, days later
+if necessary, without losing the thread.
+
+**Intent → Delivered gift** *(purchaser + recipient)*
+```
+Establish context → Choose value → Confirm → Issue & capture → Schedule → Deliver → Redeem at any branch
+```
+Enabled by: Deterministic Commerce · Grounding (monetary provenance) · Authority
+
+**Capability → Governed tool** *(platform engineering)*
+```
+Identify capability → Define once → Classify read or write → Certify schema → Publish
+    → Attach to agents → Observe → Version
+```
+Enabled by: Tool Governance · Agent Assurance
+This is the stream that keeps `search_menu` from being written three times in three dialects.
+
+**Candidate model → Certified provider** *(operators)*
+```
+Nominate candidate → Run conformance suite → Compare against threshold → Certify or reject
+    → Configure per service → Monitor drift → Re-certify
+```
+Enabled by: Model & Vendor Portability · Agent Assurance
+A provider that has not completed this stream is *unsupported*, and services refuse to start with it.
+
+### Context map
+
+Bounded contexts and the relationship patterns between them. The pattern on each edge is the contract — it
+says who conforms to whom, and where translation happens.
+
+```mermaid
+flowchart TB
+  BAR["Barista<br/>conversation"]
+  EVT["Events<br/>conversation"]
+  GFT["Gift Cards<br/>conversation"]
+  TG["Tool Governance<br/>(MCP)"]
+  CAT["Catalog"]
+  ORD["Ordering &<br/>Commerce"]
+  VEN["Events &<br/>Venue"]
+  LED["Gift Card<br/>Ledger"]
+  IAM["Identity &<br/>Access"]
+  TEN["Branch &<br/>Tenancy"]
+  IDX["Corpus &<br/>Index"]
+  ASR["Assurance"]
+
+  BAR -- "conformist" --> TG
+  EVT -- "conformist" --> TG
+  GFT -- "conformist" --> TG
+
+  TG -- "anticorruption layer" --> CAT
+  TG -- "anticorruption layer" --> ORD
+  TG -- "anticorruption layer" --> VEN
+  TG -- "anticorruption layer" --> LED
+
+  IAM -. "shared kernel: principal" .-> TG
+  TEN -. "shared kernel: branch_id + scope" .-> CAT
+  TEN -. "shared kernel: branch_id + scope" .-> VEN
+  IDX -- "customer / supplier" --> CAT
+
+  BAR -. "published language: chat envelope" .-> ASR
+  EVT -. "published language: chat envelope" .-> ASR
+  GFT -. "published language: chat envelope" .-> ASR
+```
+
+| Pattern | Where it applies | What it means |
+|---|---|---|
+| **Conformist** | Conversation contexts → Tool Governance | Agents accept published tool schemas as given. They do not negotiate a bespoke shape, which is exactly why one definition serves ADK, LangGraph and LangChain |
+| **Anticorruption layer** | Tool Governance → domain contexts | MCP translates domain APIs into agent-facing tools. Domain models never leak into a prompt, and model-shaped concerns never leak into a domain |
+| **Open host / published language** | Domain contexts upstream | Each domain publishes an HTTP contract and a shared error envelope, consumed identically by MCP, the portals and any future client |
+| **Shared kernel** | Identity and Tenancy → everything | The internal principal and `branch_id` are small, jointly-owned models. Changing either is a coordinated change, by design |
+| **Customer / supplier** | Corpus & Index → Catalog | The indexer is upstream and serves a downstream consumer whose query needs drive it |
+
+> [!IMPORTANT]
+> **Three boundaries that must never be merged**, each for a different reason:
+>
+> 1. **The three conversation contexts share no model.** Separate sessions, separate memory, separate failure
+>    modes. Merging them is how a birthday-party enquiry contaminates a coffee order.
+> 2. **Tool Governance never reaches past a domain API into storage.** The anticorruption layer is the whole
+>    point; an MCP server holding a connection string has become a second, undisciplined data plane.
+> 3. **The gift card ledger is never partitioned by branch.** Branch is an attribute of a movement. Partition
+>    it and a card bought at one branch stops working at another, which is the one thing a customer will not
+>    forgive.
+
 
 ---
 
