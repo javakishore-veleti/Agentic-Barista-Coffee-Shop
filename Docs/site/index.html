@@ -1,0 +1,1714 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Architecture plan for the Brakeman's agentic coffee shop platform.">
+<style>
+  html { color-scheme: light dark; }
+  body { margin: 0; font-family: system-ui, sans-serif; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<title>Brakeman's Agent Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ground:   #EDEFEC;
+    --surface:  #F8F9F7;
+    --sunken:   #E3E7E3;
+    --ink:      #151A18;
+    --muted:    #5C6663;
+    --faint:    #808A86;
+    --rule:     #CBD1CC;
+    --rule-soft:#DDE2DC;
+    --accent:   #26674B;
+    --accent-sf:#DCE8E0;
+    --signal:   #B8501F;
+    --signal-sf:#F3E2D6;
+
+    --display: "Zilla Slab", "Bitter", Georgia, serif;
+    --body: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+
+    --measure: 68ch;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:   #111513;
+      --surface:  #181D1B;
+      --sunken:   #0B0E0D;
+      --ink:      #E3E8E4;
+      --muted:    #98A29E;
+      --faint:    #79837F;
+      --rule:     #2C3431;
+      --rule-soft:#222927;
+      --accent:   #62BC91;
+      --accent-sf:#172A22;
+      --signal:   #E08A56;
+      --signal-sf:#2C1F16;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:   #111513;
+    --surface:  #181D1B;
+    --sunken:   #0B0E0D;
+    --ink:      #E3E8E4;
+    --muted:    #98A29E;
+    --faint:    #79837F;
+    --rule:     #2C3431;
+    --rule-soft:#222927;
+    --accent:   #62BC91;
+    --accent-sf:#172A22;
+    --signal:   #E08A56;
+    --signal-sf:#2C1F16;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 28px 120px;
+    display: grid;
+    grid-template-columns: 208px minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead {
+    grid-column: 1 / -1;
+    border-bottom: 2px solid var(--ink);
+    padding: 46px 0 22px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px 40px;
+  }
+  .masthead h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(2rem, 4.6vw, 3.1rem);
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .masthead h1 span { display: block; color: var(--accent); }
+  .stamp {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.9;
+  }
+  .stamp b { color: var(--ink); font-weight: 600; }
+  .dek {
+    grid-column: 1 / -1;
+    font-size: 1.12rem;
+    color: var(--muted);
+    max-width: 72ch;
+    margin: 24px 0 8px;
+  }
+  .dek strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- index rail ---------- */
+  nav.rail {
+    position: sticky;
+    top: 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.5;
+    border-left: 1px solid var(--rule);
+    padding: 4px 0 4px 0;
+  }
+  nav.rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  nav.rail a {
+    display: block;
+    position: relative;
+    padding: 7px 8px 7px 20px;
+    color: var(--muted);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    margin-left: -1px;
+  }
+  nav.rail a::before {
+    content: "";
+    position: absolute;
+    left: -1px; top: 50%;
+    width: 9px; height: 1px;
+    background: var(--rule);
+  }
+  nav.rail a:hover { color: var(--accent); border-left-color: var(--accent); background: var(--surface); }
+  nav.rail a:hover::before { background: var(--accent); }
+  nav.rail a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  nav.rail .num { color: var(--faint); margin-right: 8px; }
+
+  /* ---------- main flow ---------- */
+  main { min-width: 0; display: flex; flex-direction: column; gap: 52px; }
+  section { scroll-margin-top: 24px; }
+  section > * + * { margin-top: 18px; }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.62rem;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+    text-wrap: balance;
+  }
+  h2 .kicker {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 7px;
+  }
+  h3 {
+    font-family: var(--body);
+    font-weight: 600;
+    font-size: 1.02rem;
+    letter-spacing: 0.005em;
+    margin: 0;
+  }
+  p { margin: 0; max-width: var(--measure); }
+  a { color: var(--accent); }
+
+  code, .m { font-family: var(--mono); font-size: 0.86em; }
+  p code, li code, td code, th code {
+    background: var(--sunken);
+    border-radius: 3px;
+    padding: 0.1em 0.34em;
+  }
+
+  pre {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.72;
+    background: var(--sunken);
+    border: 1px solid var(--rule-soft);
+    border-radius: 4px;
+    padding: 16px 18px;
+    margin: 0;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  pre .c { color: var(--faint); }
+  pre .k { color: var(--accent); }
+  pre .w { color: var(--signal); }
+
+  ul.plain { margin: 0; padding-left: 20px; max-width: var(--measure); display: flex; flex-direction: column; gap: 8px; }
+  ul.plain li::marker { color: var(--accent); }
+
+  /* ---------- rule callout ---------- */
+  .rulebox {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-sf);
+    padding: 16px 20px;
+    border-radius: 0 4px 4px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .rulebox .lbl {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .rulebox p { max-width: 66ch; }
+  .warnbox { border-left-color: var(--signal); background: var(--signal-sf); }
+  .warnbox .lbl { color: var(--signal); }
+
+  /* ---------- figure ---------- */
+  figure { margin: 0; display: flex; flex-direction: column; gap: 12px; }
+  figure svg { width: 100%; max-width: 100%; height: auto; display: block; }
+  .figframe {
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    border-radius: 4px;
+    padding: 20px 18px;
+    overflow-x: auto;
+  }
+  .figframe > svg { min-width: 660px; }
+  figcaption { font-size: 13.5px; color: var(--muted); max-width: 70ch; }
+
+  /* ---------- tables ---------- */
+  .tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 560px; }
+  th, td { text-align: left; padding: 11px 15px; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+  thead th {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    background: var(--sunken);
+    border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.mono, th.mono { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
+  td.num { font-variant-numeric: tabular-nums; }
+
+  /* ---------- agent trio ---------- */
+  .trio { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+  .trio > article { background: var(--surface); padding: 20px; display: flex; flex-direction: column; gap: 11px; }
+  .trio .fw {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .trio h3 { font-family: var(--display); font-size: 1.18rem; font-weight: 600; }
+  .trio p { font-size: 13.5px; color: var(--muted); max-width: none; }
+  .trio ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 5px; font-family: var(--mono); font-size: 11.5px; color: var(--ink); }
+  .trio ul li { padding-left: 13px; position: relative; }
+  .trio ul li::before { content: "›"; position: absolute; left: 0; color: var(--accent); }
+  .trio .why { border-top: 1px dashed var(--rule); padding-top: 11px; font-size: 13px; }
+  .trio .why b { font-weight: 600; color: var(--ink); }
+
+  /* ---------- phases (a real sequence) ---------- */
+  .phases { display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--rule); }
+  .phase { display: grid; grid-template-columns: 62px minmax(0,1fr); gap: 20px; padding: 17px 0; border-bottom: 1px solid var(--rule-soft); }
+  .phase .n {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    padding-top: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .phase h3 { margin-bottom: 4px; }
+  .phase p { font-size: 14px; color: var(--muted); }
+
+  /* ---------- open questions ---------- */
+  .qlist { display: flex; flex-direction: column; gap: 14px; }
+  .q { display: grid; grid-template-columns: 96px minmax(0,1fr); gap: 18px; align-items: baseline; }
+  .q .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--signal);
+    border: 1px solid var(--signal);
+    border-radius: 2px;
+    padding: 2px 6px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .q p { font-size: 14.5px; }
+
+  footer {
+    grid-column: 1 / -1;
+    margin-top: 70px;
+    padding-top: 18px;
+    border-top: 2px solid var(--ink);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--faint);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: minmax(0,1fr); gap: 32px; padding: 0 20px 80px; }
+    nav.rail { position: static; border-left: none; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 10px 0; }
+    nav.rail ol { flex-direction: row; flex-wrap: wrap; gap: 4px 2px; }
+    nav.rail a { padding: 5px 10px; border-left: none; }
+    nav.rail a::before { display: none; }
+    .q { grid-template-columns: minmax(0,1fr); gap: 6px; }
+    .q .tag { justify-self: start; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="shell">
+
+  <header class="masthead">
+    <h1>Brakeman's<span>Agent Platform</span></h1>
+    <div class="stamp">
+      <b>Architecture plan</b> — rev A<br>
+      1,000 branches · one menu · one ledger<br>
+      Three agents · Three frameworks · One switchboard
+    </div>
+  </header>
+
+  <p class="dek">
+    A platform for a working coffee shop, built as <strong>three independent chat surfaces</strong> — coffee
+    ordering, private events, gift cards — each on the agent framework its control flow actually calls for, sitting
+    on top of <strong>ordinary FastAPI domain services</strong> that own all persistence. Every provider and every
+    store is an <code>.env</code> switch, and every switch is flipped in exactly one place.
+  </p>
+
+  <nav class="rail" aria-label="Sections">
+    <ol>
+      <li><a href="#scope"><span class="num">01</span>Scope</a></li>
+      <li><a href="#planes"><span class="num">02</span>The two planes</a></li>
+      <li><a href="#layout"><span class="num">03</span>Repo layout</a></li>
+      <li><a href="#agents"><span class="num">04</span>The three agents</a></li>
+      <li><a href="#mcp"><span class="num">05</span>MCP tools</a></li>
+      <li><a href="#llm"><span class="num">06</span>Seam: providers</a></li>
+      <li><a href="#stores"><span class="num">07</span>Seam: stores</a></li>
+      <li><a href="#authz"><span class="num">08</span>Seam: identity</a></li>
+      <li><a href="#branches"><span class="num">09</span>Branch model</a></li>
+      <li><a href="#commerce"><span class="num">10</span>Order model</a></li>
+      <li><a href="#scale"><span class="num">11</span>300k shards</a></li>
+      <li><a href="#contract"><span class="num">12</span>Chat contract</a></li>
+      <li><a href="#local"><span class="num">13</span>Local DevOps</a></li>
+      <li><a href="#cloud"><span class="num">14</span>Cloud workflows</a></li>
+      <li><a href="#cost"><span class="num">15</span>The $1 budget</a></li>
+      <li><a href="#portals"><span class="num">16</span>Portals</a></li>
+      <li><a href="#order"><span class="num">17</span>Build order</a></li>
+      <li><a href="#open"><span class="num">18</span>Open calls</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <section id="scope">
+      <h2><span class="kicker">01 — Scope</span>What we are actually building</h2>
+      <p>
+        A customer-facing coffee shop platform for Brakeman's with three agentic capabilities, each a separate
+        conversation with its own memory, its own tools, and its own failure modes:
+      </p>
+      <ul class="plain">
+        <li><strong>Coffee ordering</strong> — browse and order from the live menu. Grounded in the real catalog:
+          Brakeman's Blend (plum, brown sugar, molasses; Guatemala and Colombia), the Queen Bee iced honey cinnamon
+          oat latte, LoCoMocha, Ticket to London, Slow-berry Matcha, Barb's Butter Bars in Oreo or Almond Joy,
+          rotating Lenny Boy Kombucha, plus retail — 12&nbsp;oz whole bean at $17.50, mugs $12–$30, long sleeve at $24.</li>
+        <li><strong>Private events</strong> — a booking conversation with real constraints: weeknights and Sundays only,
+          2&nbsp;hours at $300 on a weeknight (7–9pm), $400 for 2&nbsp;hours or $500 for 3&nbsp;hours on a Sunday,
+          plus 1&nbsp;hour setup and 30&nbsp;minutes cleanup that must be reserved alongside the event window.</li>
+        <li><strong>Gift cards</strong> — issue, reload, and check balance. $5 / $10 / $20 / $50 / custom, for one
+          recipient or as a pooled group card, delivered by SMS or email, now or scheduled.</li>
+      </ul>
+      <p>
+        Three things are non-negotiable inputs to the design, and they drive most of what follows:
+        the LLM provider is per-service configurable (Bedrock, Gemini, Azure OpenAI, Hugging Face);
+        the data store is per-service configurable (Postgres, JSON shards, or a mix);
+        and the reference corpus is roughly <strong>300,000 JSON files</strong> — 100k of coffee, 100k of events,
+        100k of gift card configurations.
+      </p>
+    </section>
+
+    <section id="planes">
+      <h2><span class="kicker">02 — Structure</span>The two planes, and the one rule between them</h2>
+      <p>
+        The single most important decision in this design is a boundary: <strong>agent services never open a database
+        connection.</strong> They call domain APIs over HTTP, and those APIs own persistence entirely.
+      </p>
+      <div class="rulebox">
+        <span class="lbl">The rule</span>
+        <p>
+          An agent's tool is an HTTP client, not a query. <code>CATALOG_STORE</code> is read by exactly one process —
+          <code>catalog-api</code> — not by the barista agent, not by the admin portal, not by the indexer's caller.
+        </p>
+        <p>
+          Break this rule and you implement the Postgres-or-JSON switch four times and it drifts three ways.
+          Keep it and the admin portal, the agent, and any future integration all see identical menu data by
+          construction, because they are hitting the same endpoint.
+        </p>
+      </div>
+      <figure>
+        <div class="figframe">
+          <svg viewBox="0 0 920 690" role="img" aria-label="Layered architecture: three Angular chat surfaces stream over SSE through a gateway to three agent services built on Google ADK, LangGraph and LangChain; each agent calls its own FastAPI domain API over HTTP; a single repository seam below the APIs resolves the STORE environment variable to Postgres, Redis or JSON shards; an indexer walks the JSON shards into Postgres rows and embeddings.">
+            <defs>
+              <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+              </marker>
+              <marker id="ahx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"></path>
+              </marker>
+            </defs>
+
+            <g font-family="IBM Plex Mono, monospace" fill="currentColor">
+
+              <!-- portals -->
+              <rect x="30" y="16" width="860" height="96" rx="4" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.55"></rect>
+              <text x="42" y="36" font-size="11" opacity="0.7">Portals/CoffeeShop — Angular, one &lt;chat-panel&gt; component, three configs</text>
+              <rect x="40" y="46" width="260" height="52" rx="3" fill="var(--sunken)" stroke="currentColor" stroke-width="1.2"></rect>
+              <text x="170" y="70" font-size="13" text-anchor="middle">Barista chat</text>
+              <text x="170" y="87" font-size="10.5" text-anchor="middle" opacity="0.62">order coffee</text>
+              <rect x="330" y="46" width="260" height="52" rx="3" fill="var(--sunken)" stroke="currentColor" stroke-width="1.2"></rect>
+              <text x="460" y="70" font-size="13" text-anchor="middle">Events chat</text>
+              <text x="460" y="87" font-size="10.5" text-anchor="middle" opacity="0.62">book the room</text>
+              <rect x="620" y="46" width="260" height="52" rx="3" fill="var(--sunken)" stroke="currentColor" stroke-width="1.2"></rect>
+              <text x="750" y="70" font-size="13" text-anchor="middle">Gift card chat</text>
+              <text x="750" y="87" font-size="10.5" text-anchor="middle" opacity="0.62">buy · reload · balance</text>
+
+              <!-- portals -> gateway -->
+              <line x1="170" y1="112" x2="170" y2="150" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"></line>
+              <line x1="460" y1="112" x2="460" y2="150" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"></line>
+              <line x1="750" y1="112" x2="750" y2="150" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"></line>
+              <text x="478" y="136" font-size="10.5" opacity="0.72">SSE ↓ token · tool_call · ui_action · done</text>
+
+              <!-- gateway -->
+              <rect x="40" y="156" width="840" height="42" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"></rect>
+              <text x="460" y="182" font-size="12.5" text-anchor="middle">gateway (BFF) — auth, session id, trace id, rate limit</text>
+
+              <!-- gateway -> agents -->
+              <line x1="170" y1="198" x2="170" y2="236" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"></line>
+              <line x1="460" y1="198" x2="460" y2="236" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"></line>
+              <line x1="750" y1="198" x2="750" y2="236" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"></line>
+              <text x="478" y="222" font-size="10.5" opacity="0.72">routes by surface — no cross-agent traffic</text>
+
+              <!-- agents -->
+              <rect x="40" y="242" width="260" height="72" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"></rect>
+              <text x="170" y="266" font-size="12.5" text-anchor="middle">barista-agent</text>
+              <text x="170" y="283" font-size="10.5" text-anchor="middle" fill="var(--accent)">Google ADK</text>
+              <text x="170" y="301" font-size="10" text-anchor="middle" opacity="0.6">session → Redis</text>
+
+              <rect x="330" y="242" width="260" height="72" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"></rect>
+              <text x="460" y="266" font-size="12.5" text-anchor="middle">events-agent</text>
+              <text x="460" y="283" font-size="10.5" text-anchor="middle" fill="var(--accent)">LangGraph</text>
+              <text x="460" y="301" font-size="10" text-anchor="middle" opacity="0.6">checkpointer → Postgres</text>
+
+              <rect x="620" y="242" width="260" height="72" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"></rect>
+              <text x="750" y="266" font-size="12.5" text-anchor="middle">giftcards-agent</text>
+              <text x="750" y="283" font-size="10.5" text-anchor="middle" fill="var(--accent)">LangChain</text>
+              <text x="750" y="301" font-size="10" text-anchor="middle" opacity="0.6">session → Redis</text>
+
+              <!-- agents -> apis -->
+              <line x1="170" y1="314" x2="170" y2="356" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"></line>
+              <line x1="460" y1="314" x2="460" y2="356" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"></line>
+              <line x1="750" y1="314" x2="750" y2="356" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"></line>
+              <text x="478" y="340" font-size="10.5" opacity="0.72">tools resolved through the MCP layer — §05 · zero DB credentials</text>
+
+              <!-- domain apis -->
+              <rect x="40" y="362" width="260" height="66" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"></rect>
+              <text x="170" y="387" font-size="12.5" text-anchor="middle">catalog-api</text>
+              <text x="170" y="406" font-size="10" text-anchor="middle" opacity="0.6">search · get · price · validate</text>
+
+              <rect x="330" y="362" width="260" height="66" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"></rect>
+              <text x="460" y="387" font-size="12.5" text-anchor="middle">events-api</text>
+              <text x="460" y="406" font-size="10" text-anchor="middle" opacity="0.6">slots · quote · hold · inquiry</text>
+
+              <rect x="620" y="362" width="260" height="66" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"></rect>
+              <text x="750" y="387" font-size="12.5" text-anchor="middle">giftcards-api</text>
+              <text x="750" y="406" font-size="10" text-anchor="middle" opacity="0.6">denoms · issue · load · balance</text>
+
+              <!-- apis -> seam -->
+              <line x1="170" y1="428" x2="170" y2="464" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#ahx)"></line>
+              <line x1="460" y1="428" x2="460" y2="464" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#ahx)"></line>
+              <line x1="750" y1="428" x2="750" y2="464" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#ahx)"></line>
+
+              <!-- the seam -->
+              <rect x="40" y="470" width="840" height="48" rx="3" fill="var(--accent-sf)" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="6 3"></rect>
+              <text x="460" y="491" font-size="12" text-anchor="middle" fill="var(--accent)" font-weight="600">Repository protocol — the only place the store switch is read</text>
+              <text x="460" y="508" font-size="10.5" text-anchor="middle" fill="var(--accent)">CATALOG_STORE · EVENTS_STORE · GIFTCARDS_STORE = postgres | json | hybrid</text>
+
+              <!-- seam -> infra -->
+              <line x1="170" y1="518" x2="170" y2="552" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"></line>
+              <line x1="460" y1="518" x2="460" y2="552" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"></line>
+              <line x1="750" y1="518" x2="750" y2="552" stroke="currentColor" stroke-width="1.2" marker-end="url(#ah)"></line>
+
+              <!-- infra -->
+              <rect x="40" y="558" width="260" height="58" rx="3" fill="var(--sunken)" stroke="currentColor" stroke-width="1.2"></rect>
+              <text x="170" y="581" font-size="12.5" text-anchor="middle">Postgres + pgvector</text>
+              <text x="170" y="599" font-size="10" text-anchor="middle" opacity="0.6">rows · embeddings · ledger</text>
+
+              <rect x="330" y="558" width="260" height="58" rx="3" fill="var(--sunken)" stroke="currentColor" stroke-width="1.2"></rect>
+              <text x="460" y="581" font-size="12.5" text-anchor="middle">Redis</text>
+              <text x="460" y="599" font-size="10" text-anchor="middle" opacity="0.6">sessions · shard LRU · holds</text>
+
+              <rect x="620" y="558" width="260" height="58" rx="3" fill="var(--sunken)" stroke="currentColor" stroke-width="1.2"></rect>
+              <text x="750" y="581" font-size="12.5" text-anchor="middle">JSON shard corpus</text>
+              <text x="750" y="599" font-size="10" text-anchor="middle" opacity="0.6">3 × 100,000 files</text>
+
+              <!-- indexer loop -->
+              <path d="M 750 616 L 750 646 L 170 646 L 170 622" fill="none" stroke="var(--signal)" stroke-width="1.4" marker-end="url(#ah)" color="var(--signal)"></path>
+              <text x="460" y="663" font-size="11" text-anchor="middle" fill="var(--signal)">indexer — incremental by sha256, shards → rows + embeddings</text>
+            </g>
+          </svg>
+        </div>
+        <figcaption>
+          The seam in green is the whole design. Everything above it is provider- and store-agnostic; everything below it
+          is swappable without touching an agent. The orange path is the only process that reads shards in bulk.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="layout">
+      <h2><span class="kicker">03 — Layout</span>Repository layout</h2>
+      <pre><span class="c">Middleware/</span>
+  shared/                  <span class="c"># installable pkg: brakemans-common (llm, repo, telemetry, config)</span>
+  gateway/                 <span class="c"># BFF: token verification, session, SSE fan-out, tracing</span>
+  authz-api/               <span class="c"># FastAPI · users, roles, branch scope, token issue/verify</span>
+  catalog-api/             <span class="c"># FastAPI · menu, sizes, mods, allergens, retail</span>
+  events-api/              <span class="c"># FastAPI · calendar, slot math, quotes, inquiries</span>
+  giftcards-api/           <span class="c"># FastAPI · denominations, issuance, ledger, balance</span>
+  orders-api/              <span class="c"># FastAPI · carts, orders, order state machine</span>
+  barista-agent/           <span class="c"># Google ADK</span>
+  events-agent/            <span class="c"># LangGraph</span>
+  giftcards-agent/         <span class="c"># LangChain</span>
+  indexer/                 <span class="c"># batch: shards → Postgres rows + embeddings</span>
+
+<span class="c">Portals/</span>
+  CoffeeShop/              <span class="c"># Angular · customer, three chat surfaces</span>
+  CoffeeShopAdmin/         <span class="c"># Angular · catalog, bookings, ledger, agent console</span>
+
+<span class="c">DevOps/</span>
+  Local/
+    docker-all-up.sh  docker-all-down.sh  docker-all-status.sh
+    network.sh  .env.shared
+    Postgres/docker-compose.yaml
+    Redis/docker-compose.yaml
+    Middleware/docker-compose.yaml
+    Portals/docker-compose.yaml
+    Observability/docker-compose.yaml
+    Seed/generate_shards.py
+  Cloud/
+    AWS/cloudformation/      <span class="c"># stack per numbered block, cross-stack exports</span>
+    Azure/terraform/         <span class="c"># state per stack in Azure Storage</span>
+    GCP/terraform/           <span class="c"># state per stack in GCS</span>
+    contracts/               <span class="c"># the shared stack interface all three implement</span>
+
+<span class="c">.github/workflows/</span>       <span class="c"># AWS-/AZURE-/GCP- numbered Setup + Destroy pairs</span>
+<span class="c">Data/</span>                    <span class="c"># generated shard corpus (gitignored)</span></pre>
+      <div class="rulebox warnbox">
+        <span class="lbl">Packaging</span>
+        <p>
+          The three agent services get <strong>three separate dependency sets and three containers</strong>. Do not put
+          ADK and LangChain in one virtualenv — ADK pins <code>google-genai</code> and <code>langchain-google-genai</code>
+          pins it differently, and you will spend a week on resolver conflicts that the architecture never asked you to have.
+          <code>Middleware/shared</code> is the only code they hold in common, and it must stay dependency-light.
+        </p>
+      </div>
+    </section>
+
+    <section id="agents">
+      <h2><span class="kicker">04 — Agents</span>Three domains, three frameworks, three reasons</h2>
+      <p>
+        The frameworks are not interchangeable decoration here — each domain has a different control-flow shape,
+        and each framework is genuinely the better fit for its shape.
+      </p>
+      <div class="trio">
+        <article>
+          <span class="fw">Google ADK</span>
+          <h3>Barista</h3>
+          <p>A tool-calling loop over a large catalog. Open-ended questions, cheap retrieval, no required order of operations — exactly what a plain <code>LlmAgent</code> with tools does well.</p>
+          <ul>
+            <li>search_menu(query, filters)</li>
+            <li>get_item(item_id)</li>
+            <li>start_order() / add_item()</li>
+            <li>price_order() — deterministic</li>
+            <li>submit_order()</li>
+          </ul>
+          <p class="why"><b>Why ADK:</b> the domain needs breadth of retrieval, not workflow. ADK's session service and tool loop cover it with the least machinery.</p>
+        </article>
+        <article>
+          <span class="fw">LangGraph</span>
+          <h3>Private events</h3>
+          <p>A stateful booking workflow with validation gates and a human in the middle. Nodes: collect → check availability → quote → confirm → <em>interrupt for staff approval</em> → hold → submit.</p>
+          <ul>
+            <li>find_slots(date, duration)</li>
+            <li>quote(day_type, hours)</li>
+            <li>hold_slot(slot_id, ttl)</li>
+            <li>submit_inquiry(...)</li>
+            <li>resume_after_approval()</li>
+          </ul>
+          <p class="why"><b>Why LangGraph:</b> the interrupt is the point. A half-finished booking must survive a page refresh and a staff decision, which is a checkpointed graph, not a chat loop.</p>
+        </article>
+        <article>
+          <span class="fw">LangChain</span>
+          <h3>Gift cards</h3>
+          <p>The smallest surface: a bounded tool-calling chain over a handful of configuration reads and three writes. No graph needed, no long-lived state.</p>
+          <ul>
+            <li>list_denominations()</li>
+            <li>quote_card(amount, delivery)</li>
+            <li>issue_card(...)</li>
+            <li>reload_card(card_id, amount)</li>
+            <li>check_balance(card_id)</li>
+          </ul>
+          <p class="why"><b>Why LangChain:</b> it is the least framework that does the job, and it makes the contrast with the other two legible in the same repo.</p>
+        </article>
+      </div>
+      <div class="rulebox">
+        <span class="lbl">Grounding rules that live in code, not in the prompt</span>
+        <p>
+          <strong>Money is never generated.</strong> The gift card agent may not state a balance or a total that did not
+          come back from a tool call in the current turn. Same for the barista: sizes, modifiers, and totals come from
+          <code>price_order()</code>, so a latte with oat milk costs the same whether the model was feeling generous or not.
+        </p>
+        <p>
+          <strong>Availability is never inferred.</strong> A 2-hour Sunday event starting at 7pm occupies the room from
+          6:00pm to 9:30pm once setup and cleanup are counted. That arithmetic belongs in <code>events-api</code>,
+          which is the only thing that knows the shop is closed Sundays and therefore rentable.
+        </p>
+      </div>
+    </section>
+
+
+    <section id="mcp">
+      <h2><span class="kicker">05 — Tools</span>The MCP layer: one definition, three frameworks</h2>
+      <p>
+        Left alone, the design above has a duplication bug hiding in it. <code>search_menu</code> would be
+        written three times — once as an ADK function tool, once as a LangChain <code>@tool</code>, and again
+        for LangGraph — with three schemas, three sets of tests, and three opportunities to drift apart the
+        first time the catalog gains a field.
+      </p>
+      <p>
+        Each domain therefore publishes <strong>one MCP server</strong>, and every agent framework consumes it.
+      </p>
+      <figure>
+        <div class="figframe">
+          <svg viewBox="0 0 920 258" role="img" aria-label="Comparison: without MCP each of the three agent frameworks defines its own copy of the same tool against the domain API, giving three schemas; with MCP the three frameworks all attach to a single MCP server which fronts the domain API, giving one schema.">
+            <defs>
+              <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+              </marker>
+            </defs>
+            <g font-family="IBM Plex Mono, monospace" fill="currentColor">
+              <line x1="460" y1="16" x2="460" y2="242" stroke="currentColor" stroke-width="1" opacity="0.25"></line>
+
+              <text x="30" y="26" font-size="11.5" opacity="0.75">Without MCP</text>
+              <text x="490" y="26" font-size="11.5" fill="var(--accent)" font-weight="600">With MCP</text>
+
+              <rect x="30" y="44" width="104" height="30" rx="3" fill="var(--sunken)" stroke="currentColor" stroke-width="1"></rect>
+              <text x="82" y="63" font-size="10.5" text-anchor="middle">ADK</text>
+              <rect x="30" y="92" width="104" height="30" rx="3" fill="var(--sunken)" stroke="currentColor" stroke-width="1"></rect>
+              <text x="82" y="111" font-size="10.5" text-anchor="middle">LangGraph</text>
+              <rect x="30" y="140" width="104" height="30" rx="3" fill="var(--sunken)" stroke="currentColor" stroke-width="1"></rect>
+              <text x="82" y="159" font-size="10.5" text-anchor="middle">LangChain</text>
+
+              <rect x="166" y="44" width="126" height="30" rx="3" fill="none" stroke="var(--signal)" stroke-width="1.3"></rect>
+              <text x="229" y="63" font-size="10" text-anchor="middle" fill="var(--signal)">search_menu v1</text>
+              <rect x="166" y="92" width="126" height="30" rx="3" fill="none" stroke="var(--signal)" stroke-width="1.3"></rect>
+              <text x="229" y="111" font-size="10" text-anchor="middle" fill="var(--signal)">search_menu v1</text>
+              <rect x="166" y="140" width="126" height="30" rx="3" fill="none" stroke="var(--signal)" stroke-width="1.3"></rect>
+              <text x="229" y="159" font-size="10" text-anchor="middle" fill="var(--signal)">search_menu v0</text>
+
+              <line x1="134" y1="59" x2="162" y2="59" stroke="currentColor" stroke-width="1" marker-end="url(#ah2)"></line>
+              <line x1="134" y1="107" x2="162" y2="107" stroke="currentColor" stroke-width="1" marker-end="url(#ah2)"></line>
+              <line x1="134" y1="155" x2="162" y2="155" stroke="currentColor" stroke-width="1" marker-end="url(#ah2)"></line>
+
+              <rect x="330" y="44" width="96" height="126" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"></rect>
+              <text x="378" y="112" font-size="10.5" text-anchor="middle">catalog-api</text>
+              <line x1="292" y1="59" x2="326" y2="59" stroke="currentColor" stroke-width="1" marker-end="url(#ah2)"></line>
+              <line x1="292" y1="107" x2="326" y2="107" stroke="currentColor" stroke-width="1" marker-end="url(#ah2)"></line>
+              <line x1="292" y1="155" x2="326" y2="155" stroke="currentColor" stroke-width="1" marker-end="url(#ah2)"></line>
+              <text x="30" y="204" font-size="10.5" fill="var(--signal)">3 schemas · 3 test suites · one already drifted</text>
+
+              <rect x="490" y="44" width="104" height="30" rx="3" fill="var(--sunken)" stroke="currentColor" stroke-width="1"></rect>
+              <text x="542" y="63" font-size="10.5" text-anchor="middle">ADK</text>
+              <rect x="490" y="92" width="104" height="30" rx="3" fill="var(--sunken)" stroke="currentColor" stroke-width="1"></rect>
+              <text x="542" y="111" font-size="10.5" text-anchor="middle">LangGraph</text>
+              <rect x="490" y="140" width="104" height="30" rx="3" fill="var(--sunken)" stroke="currentColor" stroke-width="1"></rect>
+              <text x="542" y="159" font-size="10.5" text-anchor="middle">LangChain</text>
+
+              <rect x="640" y="44" width="126" height="126" rx="3" fill="var(--accent-sf)" stroke="var(--accent)" stroke-width="1.6"></rect>
+              <text x="703" y="100" font-size="11" text-anchor="middle" fill="var(--accent)" font-weight="600">catalog-mcp</text>
+              <text x="703" y="118" font-size="9.5" text-anchor="middle" fill="var(--accent)">search_menu v1</text>
+
+              <line x1="594" y1="59" x2="636" y2="80" stroke="currentColor" stroke-width="1" marker-end="url(#ah2)"></line>
+              <line x1="594" y1="107" x2="636" y2="107" stroke="currentColor" stroke-width="1" marker-end="url(#ah2)"></line>
+              <line x1="594" y1="155" x2="636" y2="134" stroke="currentColor" stroke-width="1" marker-end="url(#ah2)"></line>
+
+              <rect x="804" y="44" width="86" height="126" rx="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"></rect>
+              <text x="847" y="112" font-size="10.5" text-anchor="middle">catalog-api</text>
+              <line x1="766" y1="107" x2="800" y2="107" stroke="currentColor" stroke-width="1" marker-end="url(#ah2)"></line>
+              <text x="490" y="204" font-size="10.5" fill="var(--accent)">1 schema · 1 test suite · also reachable from Claude Code</text>
+              <text x="490" y="228" font-size="10" opacity="0.6">ADK: MCP toolset · LangChain/LangGraph: langchain-mcp-adapters</text>
+            </g>
+          </svg>
+        </div>
+        <figcaption>
+          The edge that changes is the tool definition. MCP does not add a capability — it removes two copies
+          of one, and puts the remaining copy somewhere other things can reach.
+        </figcaption>
+      </figure>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>MCP server</th><th>Tools</th><th>Consumed by</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">catalog-mcp</td><td class="mono">search_menu · get_item · price_order</td><td>barista-agent, admin console, Claude Code</td></tr>
+            <tr><td class="mono">events-mcp</td><td class="mono">find_slots · quote · hold_slot · submit_inquiry</td><td>events-agent</td></tr>
+            <tr><td class="mono">giftcards-mcp</td><td class="mono">list_denominations · quote_card · issue_card · reload_card · check_balance</td><td>giftcards-agent</td></tr>
+            <tr><td class="mono">ops-mcp</td><td class="mono">index_status · reindex_shards · shard_stats · resolve_interrupt</td><td>the team, from Claude Code</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="rulebox">
+        <span class="lbl">MCP as a boundary, not just a format</span>
+        <p>
+          <strong>Read tools and write tools live on separate servers.</strong> <code>issue_card</code> and
+          <code>submit_order</code> are not on the same server as <code>search_menu</code>. An agent that
+          only needs to read is handed only the read server, so it <em>physically cannot</em> call a write
+          tool — a constraint no prompt injection can talk it out of, because the capability was never
+          attached.
+        </p>
+        <p>
+          The two-plane rule from §02 still holds without exception: <strong>an MCP server is a façade over
+          the domain API's HTTP endpoints, never over the database.</strong> MCP sits inside the agent
+          plane, not underneath it. If a tool needs data the API does not expose, the fix is an endpoint,
+          not a connection string.
+        </p>
+      </div>
+      <p>
+        Transport is stdio in local development — which is also what lets the team point Claude Code or
+        Claude Desktop at <code>ops-mcp</code> and ask about index health in plain English — and streamable
+        HTTP once deployed, behind the same OIDC the gateway uses.
+      </p>
+      <div class="rulebox warnbox">
+        <span class="lbl">Where MCP is not the answer</span>
+        <p>
+          MCP costs a process and a hop. For a tool used by exactly one agent and nothing else, a plain
+          in-process function is simpler and honest. The three domain servers earn their keep because each
+          is consumed by an agent <em>and</em> by something outside it; a hypothetical fourth server used
+          only by the barista would not.
+        </p>
+      </div>
+    </section>
+
+    <section id="llm">
+      <h2><span class="kicker">06 — Seam one</span>Per-service LLM provider</h2>
+      <p>
+        <code>Middleware/shared/llm</code> exposes two functions and nothing else:
+        <code>get_chat_model(service)</code> and <code>get_embedder(service)</code>. Each service names its own provider,
+        so you can run Bedrock for the barista and Gemini for events in the same <code>docker compose up</code>.
+      </p>
+      <pre><span class="c"># Middleware/barista-agent/.env</span>
+<span class="k">BARISTA_LLM_PROVIDER</span>=ollama          <span class="c"># the $0 default — see §15</span>
+<span class="k">BARISTA_LLM_MODEL</span>=qwen2.5:7b
+<span class="k">BARISTA_LLM_BASE_URL</span>=http://ollama:11434
+<span class="k">BARISTA_EMBED_PROVIDER</span>=bedrock
+<span class="k">BARISTA_EMBED_MODEL</span>=amazon.titan-embed-text-v2:0   <span class="c"># 1024 dims</span>
+
+<span class="c"># Middleware/events-agent/.env</span>
+<span class="k">EVENTS_LLM_PROVIDER</span>=gemini
+<span class="k">EVENTS_LLM_MODEL</span>=gemini-2.5-flash
+
+<span class="c"># Middleware/giftcards-agent/.env</span>
+<span class="k">GIFTCARDS_LLM_PROVIDER</span>=azure_openai
+<span class="k">GIFTCARDS_LLM_MODEL</span>=gpt-4o-mini
+
+<span class="c"># the embedding provider is a SEPARATE switch from the chat provider</span>
+<span class="k">CATALOG_EMBED_PROVIDER</span>=ollama
+<span class="k">CATALOG_EMBED_MODEL</span>=nomic-embed-text        <span class="c"># 768 dims, self-hosted</span>
+<span class="k">CATALOG_EMBED_BASE_URL</span>=http://ollama:11434</pre>
+      <div class="rulebox">
+        <span class="lbl">Chat provider and embedding provider are not the same decision</span>
+        <p>
+          They are configured independently on purpose. The chat provider can follow the cloud you deployed to;
+          the embedding provider should not, because changing it invalidates every vector you own.
+          <strong>Self-hosting the embedder — Ollama locally or in your own cloud — makes the vector space a
+          constant you control</strong>, so an AWS deployment and a GCP deployment can differ on chat while
+          sharing one index.
+        </p>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>Provider</th><th>LangChain / LangGraph</th><th>Google ADK</th><th>Embedding dims</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">gemini</td><td>ChatGoogleGenerativeAI — native</td><td>Native <code>Gemini</code></td><td class="num mono">768</td></tr>
+            <tr><td class="mono">bedrock</td><td>ChatBedrockConverse — native</td><td>via <code>LiteLlm</code> wrapper</td><td class="num mono">1024 (Titan v2)</td></tr>
+            <tr><td class="mono">azure_openai</td><td>AzureChatOpenAI — native</td><td>via <code>LiteLlm</code> wrapper</td><td class="num mono">1536</td></tr>
+            <tr><td class="mono">huggingface</td><td>ChatHuggingFace — native</td><td>via <code>LiteLlm</code>, patchy</td><td class="num mono">384 (bge-small)</td></tr>
+            <tr><td class="mono">ollama</td><td>ChatOllama — native</td><td>via <code>LiteLlm</code></td><td class="num mono">768 (nomic-embed-text)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="rulebox warnbox">
+        <span class="lbl">Two sharp edges</span>
+        <p>
+          <strong>ADK off Gemini goes through LiteLLM.</strong> That path works, but tool-calling fidelity — parallel calls,
+          strict JSON schemas, forced tool choice — differs by provider. Before committing the barista to Bedrock, run a
+          fixed tool-calling conformance suite against every provider you intend to support and record the results;
+          treat any provider that fails it as unsupported rather than discovering it in a demo.
+        </p>
+        <p>
+          <strong>Embedding dimensions are not portable.</strong> 768 / 1024 / 1536 / 384 are different vector spaces
+          and different pgvector columns. Key the embedding table on <code>(provider, model, dim)</code> and never
+          mix spaces in one index. Switching the catalog's embedding provider means <em>re-embedding the whole
+          corpus</em> — a batch job with a progress table, not a Friday config change. Pinning the embedder to a
+          self-hosted Ollama model is the cheapest way to make that day never arrive.
+        </p>
+      </div>
+    </section>
+
+    <section id="stores">
+      <h2><span class="kicker">07 — Seam two</span>Per-service data store</h2>
+      <p>
+        Each domain API defines a <code>Repository</code> protocol and three implementations. The API code never branches
+        on the store; it receives a repository at startup and calls it.
+      </p>
+      <pre><span class="c"># Middleware/catalog-api/.env</span>
+<span class="k">CATALOG_STORE</span>=hybrid          <span class="c"># postgres | json | hybrid</span>
+<span class="k">CATALOG_JSON_ROOT</span>=/data/coffee
+<span class="k">CATALOG_PG_DSN</span>=postgresql://brakemans@postgres:5432/catalog
+
+<span class="c"># Middleware/events-api/.env</span>
+<span class="k">EVENTS_STORE</span>=json            <span class="c"># event definitions from files…</span>
+<span class="k">EVENTS_BOOKING_PG_DSN</span>=postgresql://brakemans@postgres:5432/events
+                              <span class="c">// …bookings always Postgres. See rule below.</span></pre>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>Mode</th><th>Reads</th><th>Writes</th><th>Search</th><th>Use it for</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono">json</td>
+              <td>Shard file + in-process LRU</td>
+              <td>Read-mostly; append journal</td>
+              <td>SQLite FTS5 sidecar index</td>
+              <td>Demos, air-gapped runs, showing the file-backed path works</td>
+            </tr>
+            <tr>
+              <td class="mono">postgres</td>
+              <td>Indexed rows</td>
+              <td>Transactional</td>
+              <td>pgvector + trigram</td>
+              <td>The default for anything real</td>
+            </tr>
+            <tr>
+              <td class="mono">hybrid</td>
+              <td>Postgres (hot)</td>
+              <td>Files authoritative, reconciled by indexer</td>
+              <td>pgvector</td>
+              <td>Document-lake pattern: files are truth, Postgres is the query engine</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="rulebox warnbox">
+        <span class="lbl">The constraint that makes this buildable</span>
+        <p>
+          <strong>Reference data is pluggable. Transactional data is Postgres, always.</strong>
+          Menu items, event templates, and gift card denominations can live in files. Orders, bookings, holds, and the
+          gift card ledger cannot — they need atomicity, uniqueness, and an audit trail that a directory of JSON files
+          will not give you at any level of effort.
+        </p>
+        <p>
+          So <code>EVENTS_STORE=json</code> means <em>event definitions</em> come from files while bookings still hit
+          Postgres. Say this out loud in the config comments, or someone will set <code>GIFTCARDS_STORE=json</code>
+          and quietly build a money ledger with no transactions.
+        </p>
+      </div>
+      <p>
+        Keeping the seam honest costs one test file per domain: a single contract suite, parametrized over every
+        repository implementation, asserting identical results. If <code>JsonShardRepository</code> and
+        <code>PostgresRepository</code> disagree, the suite fails — which is the only thing that stops "or a mix" from
+        rotting into two incompatible behaviours.
+      </p>
+    </section>
+
+
+    <section id="authz">
+      <h2><span class="kicker">08 — Seam three</span>Identity: one token shape, four issuers</h2>
+      <p>
+        A service, <code>authz-api</code>, owns users, roles and branch scope. It is the only thing that knows
+        which identity provider is in play, and it is configured exactly like the other two seams.
+      </p>
+      <pre><span class="k">AUTH_PROVIDER</span>=basic          <span class="c"># basic | cognito | entra_id | gcp_identity</span>
+<span class="k">AUTH_PG_DSN</span>=postgresql://brakemans@postgres:5432/authz
+<span class="k">AUTH_TOKEN_TTL</span>=3600
+<span class="k">AUTH_ISSUER</span>=https://auth.brakemans.local</pre>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Value</th><th>Where identity lives</th><th>authz-api's job</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">basic</td><td>Postgres <code>auth_users</code>, argon2id hashes</td><td>Authenticate and <strong>issue</strong> the token</td></tr>
+            <tr><td class="mono">cognito</td><td>AWS Cognito user pool</td><td><strong>Verify</strong> the pool's JWT and map claims</td></tr>
+            <tr><td class="mono">entra_id</td><td>Microsoft Entra ID</td><td>Verify and map claims</td></tr>
+            <tr><td class="mono">gcp_identity</td><td>GCP Identity Platform</td><td>Verify and map claims</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="rulebox">
+        <span class="lbl">The rule that makes the seam work</span>
+        <p>
+          <strong>Whatever the provider, <code>authz-api</code> emits one internal principal shape.</strong> Nothing
+          downstream ever sees a Cognito claim, an Entra claim or a password row — it sees this, and only this:
+        </p>
+        <pre><span class="k">principal</span> = {
+  sub, email,
+  realm:        staff | customer,
+  roles:        [ hq | regional | branch_manager | staff ] | [ customer | guest ],
+  branch_scope: [ "*" ]  |  [ "br-0042", "br-0117", … ],
+  iss, exp
+}</pre>
+        <p>
+          Swapping <code>basic</code> for <code>cognito</code> is a deployment decision, not a code change — exactly
+          as swapping Bedrock for Gemini is. The gateway verifies once and forwards a signed internal context
+          header; <strong>domain services never call the identity provider</strong>.
+        </p>
+      </div>
+      <h3>Two realms, one service</h3>
+      <p>
+        Staff and customers authenticate against <strong>separate API surfaces inside the same service</strong> —
+        <code>/v1/staff/*</code> and <code>/v1/customer/*</code> — with distinct user tables, token audiences and
+        provider configuration, while sharing one principal shape, one verification path and one deployment.
+      </p>
+      <pre><span class="k">AUTH_STAFF_PROVIDER</span>=cognito        <span class="c"># staff via the corporate pool</span>
+<span class="k">AUTH_CUSTOMER_PROVIDER</span>=basic        <span class="c"># customers in our own Postgres</span></pre>
+      <p>
+        The realms are separate because their risk is not comparable — a compromised branch manager can reprice
+        a region; a compromised customer can see their own order history — and because the two populations
+        differ by orders of magnitude. Sharing a service keeps one token format and one set of verification
+        middleware; sharing a <em>user table</em> would not.
+      </p>
+      <div class="rulebox">
+        <span class="lbl">Customer accounts, and the guest who does not want one</span>
+        <p>
+          An account unlocks saved favourites, order history and a <strong>gift card wallet</strong> — which is
+          what makes a global ledger (§09) useful to the person holding the card. It binds the cart and all
+          three chat sessions to a durable identity, so a conversation survives a device change.
+        </p>
+        <p>
+          <strong>Guest ordering stays first-class.</strong> Nobody should create an account to buy a coffee. A
+          guest gets an anonymous principal, a cart and a session; if they register later, the open cart, the
+          three sessions and any in-flight order migrate to the new account. Design that migration now —
+          retrofitting it means asking customers to lose their cart at signup.
+        </p>
+      </div>
+      <h3>Roles are the branch model, enforced</h3>
+      <p>
+        <code>branch_scope</code> is not a UI convenience — it is checked in the domain APIs, the only things that
+        can enforce it. A branch manager sets availability and daily rotation for branches in their scope and
+        nothing else; regional sets event rate cards; <strong>menu edits are HQ-only</strong>, because the menu is
+        brand-wide. A request whose principal lacks scope for the branch it names is rejected at the API, whether
+        it came from a portal, an agent, or a script.
+      </p>
+      <div class="rulebox">
+        <span class="lbl">Agents run as the customer</span>
+        <p>
+          An agent holds no service account. It carries the caller's principal through to every MCP tool call,
+          which is what makes the read/write server split from §05 real: the write server requires a principal
+          with matching scope, so an agent given only the read server <em>and</em> a customer principal is doubly
+          unable to issue a gift card. Capability and authority are separate checks; both must pass.
+        </p>
+      </div>
+      <div class="rulebox warnbox">
+        <span class="lbl">Local auth is real auth</span>
+        <p>
+          <code>AUTH_PROVIDER=basic</code> locally means a seeded user table, argon2id hashing, and genuine token
+          issuance and verification — <strong>not</strong> a header-injected fake user. If local identity is fake,
+          every authorization bug you have ships, because nothing in the development loop ever exercised the
+          check. Seed one user per role so scope violations surface on a laptop.
+        </p>
+      </div>
+    </section>
+
+    <section id="branches">
+      <h2><span class="kicker">09 — Domain</span>One menu, a thousand branches, a thousand calendars</h2>
+      <p>
+        Brakeman's runs <strong>1,000 branches across the United States</strong>, and the three domains do not
+        scale the same way across them. This distinction decides whether the corpus is a modest indexing job or
+        an eye-watering one.
+      </p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Domain</th><th>Varies by branch?</th><th>What actually differs</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Menu</strong></td><td>No — brand-wide and identical</td><td>Only <em>availability</em>, the daily rotation (today's pastry, today's kombucha), and occasional regional price adjustment</td></tr>
+            <tr><td><strong>Events</strong></td><td>Yes — substantially</td><td>Branch size tier sets capacity, which event types it can host, and what it can afford to staff — and therefore its rate card and durations</td></tr>
+            <tr><td><strong>Gift cards</strong></td><td>No — and must not</td><td>A card bought in Matthews has to redeem in Charlotte. Branch is an attribute of a transaction, never a partition of the balance</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>What this does to the catalog</h3>
+      <pre><span class="k">catalog_items</span>        ~50 rows    brand-wide, canonical, <span class="w">embedded exactly once</span>
+<span class="k">branch_profile</span>       1,000 rows  tier, seats, rentable?, region, tax jurisdiction, timezone
+<span class="k">branch_availability</span>  (branch_id, item_id, effective_date)
+                                 → available, price_override, rotation_selection
+<span class="k">event_capability</span>     (branch_id) → tier → capacity, hostable types, rate card</pre>
+      <div class="rulebox">
+        <span class="lbl">The rule that falls out of it</span>
+        <p>
+          <strong>Semantic search runs once, brand-wide. Availability filtering runs per branch, relationally.</strong>
+          <code>search_menu(query, branch_id)</code> searches the ~50 canonical items by vector, then filters the
+          result against that branch's availability for today. Never embed per branch — the vectors would be a
+          thousand identical copies of the same fifty.
+        </p>
+      </div>
+      <h3>What this does to the corpus</h3>
+      <ul class="plain">
+        <li><strong>100k coffee shards = 1,000 branches × ~100 dated menu snapshots.</strong> Item definitions are
+          byte-identical across every one. Dedupe by content hash and the distinct set to embed is
+          <strong>about fifty items</strong>, not ten million.</li>
+        <li><strong>What genuinely needs indexing at scale is availability</strong>, not text: 1,000 branches × ~50
+          items × 365 days is on the order of <strong>18 million rows a year</strong>. That is a b-tree on
+          <code>(branch_id, effective_date)</code> — a relational problem. Do not reach for pgvector to solve it.</li>
+        <li><strong>The 100k event shards are the corpus that earns the shard machinery.</strong> Branch calendars
+          genuinely differ — dates, capacities, rate cards — so dedupe buys little and the indexer does real work.</li>
+        <li><strong>The 100k gift card shards are brand-wide configuration × branch participation</strong> — which
+          denominations a branch promotes, which branch-funded promos run where. The ledger stays in Postgres
+          regardless of what the shards say.</li>
+      </ul>
+      <h3>Tiering is data, not an enum</h3>
+      <p>
+        How many tiers there are, and what puts a branch in one, must be queryable and changeable without a
+        deploy — because the tier definition <em>is</em> the events pricing model for 999 branches.
+      </p>
+      <pre><span class="k">branch_metrics</span>     branch_id · seats · sqft · staff_headcount · has_private_area
+                   measured_at                          <span class="c"># observed facts</span>
+<span class="k">branch_tier</span>        tier_id · name · min_seats · max_seats · min_sqft
+                   max_event_guests · staffing_cost_index · sort_order
+<span class="k">tier_event_type</span>    tier_id · event_type                   <span class="c"># what a tier may host</span>
+<span class="k">event_rate_card</span>    tier_id · day_type (weeknight|sunday) · duration_hours
+                   price · setup_minutes · cleanup_minutes · effective_from
+<span class="k">branch_profile</span>     … · tier_id · tier_assigned_at · <span class="w">tier_assigned_by (auto|manual)</span></pre>
+      <div class="rulebox">
+        <span class="lbl">How a branch gets its tier</span>
+        <p>
+          <strong>Seats is the primary driver</strong>, because event capacity is literally seats; square
+          footage breaks ties; <code>staffing_cost_index</code> modifies <em>price</em>, never capacity. A
+          nightly job evaluates <code>branch_metrics</code> against <code>branch_tier</code> bands and writes
+          the assignment.
+        </p>
+        <p>
+          <strong>Manual pinning is supported and recorded.</strong> A branch with an awkward layout can be
+          pinned to a lower tier with a reason; <code>tier_assigned_by = manual</code> means the nightly job
+          leaves it alone. Without this the first exception becomes a hardcoded branch id in a query.
+        </p>
+        <p>
+          Start with four tiers and let the table prove or disprove that number. Matthews seeds the mid tier:
+          weeknight 2h $300, Sunday 2h $400 and 3h $500, 60 minutes setup, 30 minutes cleanup — real rows in
+          <code>event_rate_card</code>, not constants in code.
+        </p>
+      </div>
+      <h3>Price authority is a policy table with an approval trail</h3>
+      <p>
+        The menu is brand-wide, yet <code>price_override</code> exists per branch. Who may set one, and by how
+        much, is data — so the first exception is a row, not an ad-hoc database edit at 11pm.
+      </p>
+      <pre><span class="k">price_policy</span>             scope (brand|region|branch) · category · role_required
+                          max_delta_pct · max_delta_abs · requires_approval_above_pct
+<span class="k">price_override_request</span>   branch_id · item_id · proposed_price · reason
+                          requested_by · requested_at · status
+                          approved_by · approved_at · effective_from · effective_to
+<span class="k">price_override</span>           branch_id · item_id · price · source_request_id
+                          effective_from · effective_to      <span class="c"># the applied result</span></pre>
+      <div class="rulebox">
+        <span class="lbl">The workflow the tables encode</span>
+        <p>
+          A regional manager proposes an override. If it falls inside their policy band it is applied
+          immediately; if it exceeds <code>requires_approval_above_pct</code> it escalates to HQ and sits as
+          <code>pending</code>. Either way there is a request row with a reason, an actor and a timestamp —
+          so "why is a latte $6.25 in Raleigh" has an answer.
+        </p>
+        <p>
+          <strong>Overrides are effective-dated, and orders snapshot the price anyway (§10).</strong> The two
+          mechanisms are complementary: the override table explains what the price <em>is</em>, the order line
+          records what it <em>was</em> when someone paid it.
+        </p>
+      </div>
+      <div class="rulebox warnbox">
+        <span class="lbl">Branch context is not optional</span>
+        <p>
+          Every conversation carries a <code>branch_id</code>, and it is a <strong>required</strong> parameter on
+          nearly every MCP tool. A tool called without one <strong>fails loudly rather than defaulting to a
+          flagship branch</strong> — a barista that quietly answers from Matthews' availability while the customer
+          is standing in Raleigh is worse than one that asks which store.
+        </p>
+        <p>
+          The reference branch in the fixtures is modelled on a real independent shop in Matthews, NC, whose
+          published figures seed the mid tier — 2 hours at $300 on a weeknight,
+          $400 for 2 hours or $500 for 3 on a Sunday, 1 hour setup and 30 minutes cleanup — seed the mid-size tier
+          the other 999 derive from.
+        </p>
+      </div>
+    </section>
+
+    <section id="commerce">
+      <h2><span class="kicker">10 — Domain</span>The order is a commerce document, not a list of drinks</h2>
+      <p>
+        A submitted order is a standard order-management structure: a header, lines, line modifiers, and
+        <strong>many</strong> discounts and taxes, plus shipping where the goods actually ship. Modelling it as
+        "a cart with a total" works right up until the first promotion, and then never again.
+      </p>
+      <pre><span class="k">order_header</span>          order_id · branch_id · customer_ref · channel (web|chat|pos)
+                      status · currency · placed_at · fulfil_at
+                      subtotal · discount_total · tax_total · shipping_total · grand_total
+<span class="k">order_line</span>            line_no · item_id · <span class="w">item_snapshot</span> · qty · unit_price
+                      line_subtotal · line_discount_total · line_tax_total · line_total
+<span class="k">order_line_modifier</span>   modifier_id · snapshot · price_delta
+<span class="k">order_discount</span>        code · scope (order|line) · type (pct|amount) · value
+                      <span class="w">sequence</span> · applied_amount
+<span class="k">order_tax</span>             scope (order|line) · jurisdiction · rate · taxable_base · tax_amount
+<span class="k">order_shipping</span>        method · address_ref · cost · tax_amount        <span class="c"># retail only</span>
+<span class="k">order_payment</span>         method (giftcard|card|mock) · amount · ref · status
+<span class="k">order_event</span>           append-only status transitions, with actor</pre>
+      <div class="rulebox">
+        <span class="lbl">Four rules this structure exists to enforce</span>
+        <p>
+          <strong>1. Lines snapshot the item.</strong> A line stores the name, description and price
+          <em>as of purchase</em>. The menu is brand-wide and mutable; an order must not silently change when HQ
+          edits a price two months later.
+        </p>
+        <p>
+          <strong>2. Discounts are ordered and their result is stored.</strong> Ten percent off then two dollars
+          off is not the same as two dollars off then ten percent. <code>sequence</code> is part of the data, and
+          <code>applied_amount</code> is written down rather than recomputed at read time.
+        </p>
+        <p>
+          <strong>3. Taxes are many, and per jurisdiction.</strong> A thousand branches across the United States
+          means state, county and prepared-food rates that differ by branch and by item category — which is why
+          <code>branch_profile</code> carries a tax jurisdiction. Taxes attach per line, not per order.
+        </p>
+        <p>
+          <strong>4. Totals are stored, never derived on read.</strong> Recomputing a two-year-old order under
+          today's rates produces a confidently wrong number, and it will be wrong in an audit.
+        </p>
+      </div>
+      <h3>Where tax rates come from</h3>
+      <p>
+        A versioned rate table — <strong>Postgres or a JSON file, per the same store seam as everything else</strong>
+        — loaded into an in-process cache when a pod starts. No external tax service, no network hop on the
+        ordering path.
+      </p>
+      <pre><span class="k">tax_jurisdiction</span>   jurisdiction_id · name · state · county · city
+<span class="k">tax_rate</span>           jurisdiction_id · category (prepared|grocery|merchandise)
+                   rate · <span class="w">effective_from · effective_to · rate_version</span>
+<span class="k">branch_profile</span>     … · jurisdiction_id                <span class="c"># from the tables above</span></pre>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Matthews, NC — seed data</th><th>Prepared drink</th><th>Whole bean / merchandise</th></tr></thead>
+          <tbody>
+            <tr><td>NC state</td><td class="num mono">4.75%</td><td class="num mono">4.75%</td></tr>
+            <tr><td>Mecklenburg County + transit</td><td class="num mono">2.50%</td><td class="num mono">2.50%</td></tr>
+            <tr><td>Prepared food &amp; beverage</td><td class="num mono">1.00%</td><td class="num mono">—</td></tr>
+            <tr><td><strong>Combined</strong></td><td class="num mono"><strong>8.25%</strong></td><td class="num mono"><strong>7.25%</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Those figures are <strong>illustrative seed data, not tax advice</strong>. They exist so the pipeline
+        computes something plausible from day one and so the category distinction is genuinely exercised — a
+        bag of beans and a latte are not taxed alike. Every jurisdiction needs verifying before real money moves.
+      </p>
+      <div class="rulebox warnbox">
+        <span class="lbl">Three rules the cache has to obey</span>
+        <p>
+          <strong>Rates are effective-dated and orders record the version used.</strong> <code>order_tax</code>
+          stores the resolved rate <em>and</em> its <code>rate_version</code>, so a two-year-old order can be
+          explained without guessing which table priced it.
+        </p>
+        <p>
+          <strong>A pod that cannot load rates fails readiness.</strong> It does not start serving with an empty
+          cache and quietly compute zero tax. That is a silent financial defect, and the only safe failure mode
+          is not taking traffic.
+        </p>
+        <p>
+          <strong>Invalidation is explicit, not TTL-guessed.</strong> Pods poll the single cheap
+          <code>rate_version</code> value and reload the set when it changes, so every pod in the cluster
+          converges within a poll interval — no restart, no redeploy.
+        </p>
+      </div>
+      <p>
+        <strong>Shipping applies to retail only.</strong> Whole bean at $17.50, mugs and shirts can ship; drinks
+        and pastries are pickup at a branch. The model carries shipping on every order and a drinks-only order
+        simply has none — rather than two order types that diverge.
+      </p>
+      <div class="rulebox warnbox">
+        <span class="lbl">Fulfilment: mocked, contract-shaped — the same call as payments</span>
+        <p>
+          A submitted order does not stop at a persisted record; it reaches a <code>PosAdapter</code> whose
+          methods mirror a real point-of-sale — submit ticket, poll status, void, close. <code>MockPosAdapter</code>
+          moves a ticket through <em>accepted → in&nbsp;progress → ready → collected</em> on a timer and writes each
+          transition to <code>order_event</code>.
+        </p>
+        <p>
+          Consistent with the payment decision: real contract, no real integration. The agent and the portal both
+          watch <code>order_event</code>, so the day a real POS is wired in, neither changes.
+        </p>
+      </div>
+      <p>
+        And the rule from §04 applies with full force here: <strong>the model never computes any of this.</strong>
+        <code>price_order()</code> returns the complete priced document — every discount line, every tax line,
+        every total — and the agent's only job is to read it out.
+      </p>
+    </section>
+
+    <section id="scale">
+      <h2><span class="kicker">11 — Scale</span>300,000 files, and why file-backed still needs an index</h2>
+      <p>
+        300,000 shard files across the three domains, structured as described in §09 — 1,000 branches × roughly
+        100 dated snapshots each. Three consequences fall straight out of those numbers, and they hold whichever
+        store mode is configured.
+      </p>
+      <ul class="plain">
+        <li>
+          <strong>Nothing may scan the corpus at request time.</strong> Opening 100,000 files to answer "do you have
+          anything with oat milk" is a multi-minute operation. Every query path goes through an index; the shards are
+          bulk-read exactly once, by the indexer.
+        </li>
+        <li>
+          <strong>File-backed does not mean index-free.</strong> In <code>json</code> mode the index is a SQLite sidecar
+          (FTS5 for lexical, a flat vector table for semantic) written next to the corpus. You lose Postgres, not
+          indexing.
+        </li>
+        <li>
+          <strong>Item ids encode location.</strong> <code>cof:00042:017</code> is shard 42, offset 17 — an O(1) fetch
+          that opens one 30&nbsp;KB file and indexes into a list, with the parsed shard cached in an LRU and hot items in Redis.
+        </li>
+      </ul>
+      <p>
+        The indexer is incremental and idempotent. A <code>shards</code> table holds
+        <code>(shard_id, path, sha256, item_count, mtime, indexed_at)</code>; a run diffs checksums, re-reads only what
+        changed, and is safe to kill and restart. It is a job, not a service — triggered on deploy, by the admin portal,
+        or by a file watcher in local dev.
+      </p>
+      <div class="rulebox">
+        <span class="lbl">Do the arithmetic before you embed</span>
+        <p>
+          Embedding every shard row naively is roughly <strong>40&nbsp;GB of raw vectors</strong> at 1024 dimensions
+          before index overhead, plus an embedding bill to match. Embedding the <strong>deduplicated canonical
+          catalog</strong> — the ~50 distinct items from §09 — is a few hundred kilobytes and costs cents. Nothing
+          about the corpus changed between those two numbers; the only difference is whether you hash content and
+          embed the distinct set before you start. Treat any pipeline that embeds per-shard rather than
+          per-distinct-item as a defect, not a tuning opportunity.
+        </p>
+      </div>
+    </section>
+
+    <section id="contract">
+      <h2><span class="kicker">12 — Contract</span>One chat envelope, three windows</h2>
+      <p>
+        The windows are independent, but they share a wire format — which is what lets Angular have one
+        <code>&lt;chat-panel&gt;</code> component instead of three, and leaves the door open to a routing supervisor later
+        without redesigning the front end.
+      </p>
+      <pre><span class="k">POST</span> /v1/chat/{surface}/{session_id}   →  text/event-stream
+     surface ∈ { barista, events, giftcards }
+
+<span class="c">→</span>  { "message": "something iced and not too sweet", "context": {...} }
+
+<span class="c">←</span>  event: token        { "text": "The Queen Bee is" }
+    event: tool_call    { "name": "search_menu", "args": {...} }
+    event: tool_result  { "name": "search_menu", "ms": 42, "n": 3 }
+    event: <span class="w">ui_action</span>   { "kind": "order_summary", "payload": {...} }
+    event: error        { "code": "provider_timeout", "retryable": true }
+    event: done         { "tokens_in": 812, "tokens_out": 240, "cost_usd": 0.0031 }</pre>
+      <p>
+        <code>ui_action</code> is the piece worth designing carefully. It is how an agent pushes a real Angular component
+        into the transcript — a priced order summary, an event quote with the setup window drawn in, a gift card preview
+        with the recipient and delivery time — instead of asking the model to draw a table in text. Structured payload
+        in, typed component out; the model never formats money.
+      </p>
+      <p>
+        Sessions are namespaced per surface (<code>sess:barista:{id}</code>) in Redis, so the three windows genuinely
+        do not share memory. The events agent additionally checkpoints its graph to Postgres, because its state has to
+        outlive the browser tab.
+      </p>
+    </section>
+
+    <section id="local">
+      <h2><span class="kicker">13 — Local</span>DevOps/Local</h2>
+      <p>
+        Per-component compose files joined by one external Docker network, driven by three scripts. The value of the
+        scripts is ordering and health-gating — not saving you from typing <code>docker compose</code>.
+      </p>
+      <pre><span class="k">docker-all-up.sh</span>
+  1. network.sh                    <span class="c"># create shared external network, idempotent</span>
+  2. Postgres + Redis              <span class="c"># up, then WAIT for healthcheck</span>
+  3. alembic upgrade head          <span class="c"># migrations, per domain db</span>
+  4. indexer --bootstrap           <span class="c"># only if shard corpus newer than index</span>
+  5. catalog/events/giftcards-api  <span class="c"># wait for /healthz</span>
+  6. the three agent services      <span class="c"># wait for /healthz</span>
+  7. gateway → portals
+
+<span class="k">docker-all-status.sh</span>   <span class="c"># per service: container state, /healthz, and —</span>
+                       <span class="c"># the resolved LLM_PROVIDER and STORE for each</span>
+
+<span class="k">docker-all-down.sh</span>     <span class="c"># reverse order; --volumes to drop data too</span></pre>
+      <p>
+        Having <code>status</code> print each service's <em>resolved</em> provider and store is worth the twenty lines it
+        takes. With a per-service configuration matrix this size, "which model is the events agent actually using right
+        now" becomes a question you ask several times a day.
+      </p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Service</th><th>Port</th><th>Service</th><th>Port</th></tr></thead>
+          <tbody>
+            <tr><td>Postgres</td><td class="mono num">5432</td><td>barista-agent</td><td class="mono num">8201</td></tr>
+            <tr><td>Redis</td><td class="mono num">6379</td><td>events-agent</td><td class="mono num">8202</td></tr>
+            <tr><td>catalog-api</td><td class="mono num">8101</td><td>giftcards-agent</td><td class="mono num">8203</td></tr>
+            <tr><td>events-api</td><td class="mono num">8102</td><td>gateway</td><td class="mono num">8080</td></tr>
+            <tr><td>giftcards-api</td><td class="mono num">8103</td><td>CoffeeShop portal</td><td class="mono num">4200</td></tr>
+            <tr><td>orders-api</td><td class="mono num">8104</td><td>CoffeeShopAdmin portal</td><td class="mono num">4201</td></tr>
+            <tr><td>authz-api</td><td class="mono num">8100</td><td>MCP servers</td><td class="mono num">8301–8304</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="cloud">
+      <h2><span class="kicker">14 — Cloud</span>Manually-triggered GitHub Actions</h2>
+      <p>
+        Every workflow is <code>workflow_dispatch</code> only — nothing provisions or destroys on a push. Names carry the
+        cloud, an ordering number, the verb, and the target:
+      </p>
+      <pre><span class="k">&lt;CLOUD&gt;-&lt;NNNN&gt;-&lt;Setup|Destroy&gt;-&lt;Target&gt;.yml</span>
+
+AWS-0001-Setup-Network.yml        AWS-0001-Destroy-Network.yml
+AWS-0010-Setup-Identity.yml       AWS-0010-Destroy-Identity.yml
+AWS-0100-Setup-Postgres.yml       AWS-0100-Destroy-Postgres.yml
+AWS-0110-Setup-Redis.yml          AWS-0110-Destroy-Redis.yml
+AWS-0120-Setup-ObjectStore.yml    AWS-0120-Destroy-ObjectStore.yml
+AWS-0200-Setup-Registry.yml       AWS-0200-Destroy-Registry.yml
+AWS-0210-Setup-Images.yml         <span class="c"># build + push, no Destroy pair</span>
+AWS-0300-Setup-DomainApis.yml     AWS-0300-Destroy-DomainApis.yml
+AWS-0310-Setup-AgentServices.yml  AWS-0310-Destroy-AgentServices.yml
+AWS-0320-Setup-Gateway.yml        AWS-0320-Destroy-Gateway.yml
+AWS-0400-Setup-Portals.yml        AWS-0400-Destroy-Portals.yml
+AWS-0500-Setup-Observability.yml  AWS-0500-Destroy-Observability.yml
+AWS-0900-Setup-All.yml            AWS-0999-Destroy-All.yml
+
+<span class="c">…and the same numbers under AZURE- and GCP-.</span></pre>
+      <p>
+        The number is not decoration: it is the dependency order.
+        <strong>Setup runs ascending, Destroy runs descending</strong> — so <code>0999-Destroy-All</code> tears down
+        portals before gateway before agents before data, and a network teardown at <code>0001</code> is
+        last by construction. Each Destroy guards on "no higher-numbered stack still exists" and refuses rather than
+        orphaning resources.
+      </p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Block</th><th>Owns</th><th>AWS</th><th>Azure</th><th>GCP</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">0001–0099</td><td>Network, identity, OIDC trust</td><td>VPC, IAM roles</td><td>VNet, RG, managed identity</td><td>VPC, WIF, service accounts</td></tr>
+            <tr><td class="mono">0100–0199</td><td>Data plane</td><td>RDS, ElastiCache, S3</td><td>PG Flexible, Cache, Blob</td><td>Cloud SQL, Memorystore, GCS</td></tr>
+            <tr><td class="mono">0200–0299</td><td>Registry and images</td><td>ECR</td><td>ACR</td><td>Artifact Registry</td></tr>
+            <tr><td class="mono">0300–0399</td><td>Middleware services</td><td>ECS Fargate</td><td>Container Apps</td><td>Cloud Run</td></tr>
+            <tr><td class="mono">0400–0499</td><td>Portals + CDN</td><td>S3 + CloudFront</td><td>Static Web Apps</td><td>Cloud Storage + LB</td></tr>
+            <tr><td class="mono">0500–0599</td><td>Observability</td><td>CloudWatch + OTel</td><td>App Insights</td><td>Cloud Trace</td></tr>
+            <tr><td class="mono">0900–0999</td><td>Composites</td><td colspan="3">Reusable-workflow callers that chain the blocks in order</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Mechanically: each numbered file is a thin dispatch wrapper over a reusable workflow in
+        <code>.github/workflows/_reusable/</code>, so the deploy steps exist once rather than sixty times.
+        Auth is OIDC federation to each cloud — no long-lived keys in secrets. Every workflow takes an
+        <code>environment</code> input, and every <strong>Destroy takes a typed confirmation input</strong> that must
+        match the environment name before the job proceeds. A <code>concurrency</code> group keyed on
+        <code>(cloud, env, block)</code> prevents a Setup and a Destroy from racing on the same stack.
+      </p>
+      <h3>Two toolchains, on purpose</h3>
+      <p>
+        <strong>AWS uses CloudFormation. Azure and GCP use Terraform.</strong> One numbered block is one
+        CloudFormation stack on AWS and one Terraform state on the others, so <code>0100-Destroy-Postgres</code>
+        is a single <code>delete-stack</code> or a single scoped <code>destroy</code> — never a hunt through a
+        console for orphaned resources.
+      </p>
+      <div class="rulebox">
+        <span class="lbl">What CloudFormation gives you for free</span>
+        <p>
+          Because each stack publishes its outputs as <strong>exports</strong> and the next block up
+          <strong>imports</strong> them, CloudFormation refuses to delete a stack whose exports are still in use.
+          The reverse-order teardown rule stops being a convention the workflow has to police and becomes an
+          API-level guarantee — <code>0001-Destroy-Network</code> simply fails while anything above it is alive.
+        </p>
+        <p>
+          Terraform gives you no such guard across separate states, so <strong>the Azure and GCP Destroy workflows
+          must implement the check themselves</strong>: query for a higher-numbered stack's state before
+          destroying, and refuse. Write that check once in the reusable workflow, not once per block.
+        </p>
+      </div>
+      <p>
+        The cost of the split is a shared stack interface that has to be honoured twice — same block numbers, same
+        inputs, same outputs, expressed in two dialects. Keep that contract in
+        <code>DevOps/Cloud/contracts/</code> as plain documented parameter and output names, and review any change
+        to it against all three clouds at once.
+      </p>
+      <div class="rulebox">
+        <span class="lbl">The payoff of seam one</span>
+        <p>
+          Because the provider abstraction already exists, the same container images run on all three clouds — AWS deploys
+          set <code>*_LLM_PROVIDER=bedrock</code>, Azure sets <code>azure_openai</code>, GCP sets <code>gemini</code>.
+          The templates differ — CloudFormation on one side, Terraform on the other. The application does not.
+        </p>
+      </div>
+    </section>
+
+
+    <section id="cost">
+      <h2><span class="kicker">15 — Budget</span>The whole platform for about a dollar</h2>
+      <p>
+        Target: <strong>$0 standing cost, and no more than $1 for a full cloud provision–demo–destroy cycle.</strong>
+        Every default below follows from that. None of them weaken the seams — the seams are precisely what make
+        a free default safe, because the day the budget changes, the provider is a variable rather than a project.
+      </p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Concern</th><th>The call</th><th>Why</th><th>Cost</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Chat model</strong></td>
+              <td class="mono">ollama · qwen2.5:7b</td>
+              <td>Self-hosted locally and in the cloud from the same image. Gemini's free tier is the fallback if tool calling disappoints.</td>
+              <td class="mono">$0</td>
+            </tr>
+            <tr>
+              <td><strong>Embeddings</strong></td>
+              <td class="mono">ollama · nomic-embed-text</td>
+              <td>768 dims, self-hosted. Pins the vector space so it never needs re-embedding when the deployment target changes.</td>
+              <td class="mono">$0</td>
+            </tr>
+            <tr>
+              <td><strong>Postgres</strong></td>
+              <td>Neon free tier</td>
+              <td>pgvector included, scales to zero, and <em>one</em> DSN works from a laptop and from all three clouds. Managed Postgres in any single cloud costs more than the entire budget.</td>
+              <td class="mono">$0</td>
+            </tr>
+            <tr>
+              <td><strong>Redis</strong></td>
+              <td>Upstash free tier</td>
+              <td>Or omit it in the free profile and put sessions in Postgres — Redis is a performance choice here, not a correctness one.</td>
+              <td class="mono">$0</td>
+            </tr>
+            <tr>
+              <td><strong>Image registry</strong></td>
+              <td class="mono">ghcr.io</td>
+              <td>One registry all three clouds can pull from. Avoids standing up ECR <em>and</em> ACR <em>and</em> Artifact Registry, and removes a whole numbered block from each cloud.</td>
+              <td class="mono">$0</td>
+            </tr>
+            <tr>
+              <td><strong>Primary cloud</strong></td>
+              <td>GCP Cloud Run</td>
+              <td>Scales to zero with a monthly free grant. Azure Container Apps is the equivalent second target.</td>
+              <td class="mono">~$0</td>
+            </tr>
+            <tr>
+              <td><strong>AWS</strong></td>
+              <td>Demo-only: provision → demo → destroy</td>
+              <td>Nothing on AWS scales to zero cheaply. Stand the stack up for a demonstration and tear it down the same day.</td>
+              <td class="mono">&lt;$1/cycle</td>
+            </tr>
+            <tr>
+              <td><strong>Kubernetes</strong></td>
+              <td>Not in the budget</td>
+              <td>A managed control plane costs more per month than this entire target. Serverless containers instead.</td>
+              <td class="mono">—</td>
+            </tr>
+            <tr>
+              <td><strong>Shard corpus</strong></td>
+              <td>Full 300k local; sampled in cloud</td>
+              <td>300,000 object writes is a genuine charge and demonstrates nothing a 100-file sample does not.</td>
+              <td class="mono">$0</td>
+            </tr>
+            <tr>
+              <td><strong>Identity</strong></td>
+              <td class="mono">basic</td>
+              <td>Cognito and Entra free tiers are also $0, but <code>basic</code> is portable and is the path local development actually exercises.</td>
+              <td class="mono">$0</td>
+            </tr>
+            <tr>
+              <td><strong>Tracing</strong></td>
+              <td>OTel collector + Jaeger in compose</td>
+              <td>Local by default; each cloud's native tracing free tier when deployed.</td>
+              <td class="mono">$0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="rulebox">
+        <span class="lbl">This is exactly why AWS got CloudFormation</span>
+        <p>
+          Under this posture the numbered <strong>Destroy workflows are routine, not emergency equipment</strong> —
+          the AWS stack goes up for a demonstration and comes down the same afternoon. Export-enforced teardown
+          ordering (§14) stops being a nicety and becomes the thing that makes a same-day destroy safe enough to
+          run without reading the console first.
+        </p>
+      </div>
+      <div class="rulebox">
+        <span class="lbl">The Kubernetes note, since the tax cache assumed pods</span>
+        <p>
+          The rate-cache design in §10 is unchanged by dropping Kubernetes: it caches per <em>instance</em>
+          rather than per pod, still fails readiness when rates will not load, and still converges on a
+          <code>rate_version</code> poll. Cloud Run and Container Apps both honour a readiness signal. If you
+          want to exercise manifests anyway, run <code>kind</code> or <code>k3d</code> locally — also $0.
+        </p>
+      </div>
+      <div class="rulebox warnbox">
+        <span class="lbl">What the dollar actually costs you</span>
+        <p>
+          A 7B model on a laptop is slower than a frontier model and <strong>materially weaker at tool
+          calling</strong> — which is the one capability this entire architecture rests on. Do not treat "a
+          small local model reliably calls our tools with the right arguments" as an assumption. It is the
+          first experiment, it belongs in the conformance suite before any agent work starts, and if it fails
+          the answer is Gemini's free tier for the barista rather than redesigning the tools.
+        </p>
+        <p>
+          The second cost is honesty about the demo: a sampled cloud corpus proves the pipeline, not the scale.
+          Claims about 300k-shard performance stay backed by local runs.
+        </p>
+      </div>
+    </section>
+
+    <section id="portals">
+      <h2><span class="kicker">16 — Portals</span>Customer and admin</h2>
+      <p>
+        <strong>Portals/CoffeeShop</strong> — the menu, hours, location, and three chat surfaces reached as three routes
+        or a segmented control. One <code>&lt;chat-panel&gt;</code> component parametrized by surface, streaming over
+        <code>EventSource</code>, rendering <code>ui_action</code> payloads as typed Angular components. Signals for
+        transcript state; no shared store between surfaces, matching the backend isolation.
+      </p>
+      <p>
+        <strong>Portals/CoffeeShopAdmin</strong> — catalog CRUD with shard and index health, the event inquiry queue,
+        the gift card ledger and denomination config, and an agent console showing live sessions, tool call traces,
+        token spend by provider, and prompt versions.
+      </p>
+      <div class="rulebox">
+        <span class="lbl">The join worth building</span>
+        <p>
+          Staff approving an event inquiry in the admin portal <strong>resolves the LangGraph interrupt</strong> for that
+          booking — the customer's chat, still open or reopened days later from the checkpoint, picks up exactly where
+          it paused and confirms. That single path is the clearest demonstration of why events got a graph and the other
+          two did not, so build it early rather than as a stretch goal.
+        </p>
+      </div>
+    </section>
+
+    <section id="order">
+      <h2><span class="kicker">17 — Sequence</span>Build order</h2>
+      <p>Each step is runnable and demonstrable before the next begins. Numbering is dependency order, not preference.</p>
+      <div class="phases">
+        <div class="phase">
+          <div class="n">01</div>
+          <div>
+            <h3>Skeleton and shared package</h3>
+            <p><code>Middleware/shared</code> with config, telemetry, and the two seams as protocols with one implementation each. <code>DevOps/Local</code> scripts bringing up Postgres and Redis. Nothing agentic yet.</p>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="n">02</div>
+          <div>
+            <h3>Corpus generator and indexer</h3>
+            <p><code>Seed/generate_shards.py</code> produces the real 300k-file corpus from the actual Brakeman's menu with realistic variation. The indexer walks it. Now you have honest numbers for dedupe ratio, index size, and embedding cost before committing to a provider.</p>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="n">03</div>
+          <div>
+            <h3>catalog-api, all three store modes</h3>
+            <p>The first domain API end to end, with the parametrized contract suite proving json, postgres, and hybrid agree. This step validates the seam design; if it is awkward here, fix it before two more APIs inherit the shape.</p>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="n">04</div>
+          <div>
+            <h3>barista-agent + one chat surface</h3>
+            <p>ADK on Gemini first (the native path), gateway, SSE, and the Angular chat panel. First vertical slice — a customer can order coffee. Add the LiteLLM providers only once the Gemini path is solid.</p>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="n">05</div>
+          <div>
+            <h3>Provider conformance suite</h3>
+            <p>The tool-calling matrix across Bedrock, Azure, and Hugging Face for both framework families. Publish the results table into the repo. This is what turns "configurable" from an aspiration into a supported list.</p>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="n">06</div>
+          <div>
+            <h3>events-api + events-agent + admin approval</h3>
+            <p>The LangGraph graph, the Postgres checkpointer, and the interrupt resolved from the admin portal. The hardest and most interesting slice.</p>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="n">07</div>
+          <div>
+            <h3>giftcards-api + agent, mocked adapters</h3>
+            <p><code>PaymentGateway</code> and <code>GiftCardIssuer</code> protocols shaped like Square's Gift Cards and Payments APIs, with a Postgres-backed mock ledger behind them. No real money, real contract.</p>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="n">08</div>
+          <div>
+            <h3>Cloud workflows, one cloud at a time</h3>
+            <p>AWS blocks 0001→0900 first, proven by a full Setup-All and Destroy-All cycle in a scratch account. Only then clone the numbering to Azure and GCP.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="open">
+      <h2><span class="kicker">18 — Open</span>Calls still to make</h2>
+      <div class="qlist">
+        <div class="q">
+          <span class="tag">Risk</span>
+          <p><strong>Two IaC dialects will drift.</strong> CloudFormation on AWS and Terraform on Azure and GCP is a deliberate trade — clean <code>delete-stack</code> teardown and export-enforced ordering in exchange for writing every block twice. The mitigation is the shared stack contract and a rule that no block is considered done until both dialects implement it; the failure mode is AWS racing ahead and the other two quietly becoming stale.</p>
+        </div>
+        <div class="q">
+          <span class="tag">Risk</span>
+          <p><strong>Rate and tier maintenance.</strong> The rate table and the tier bands are the right mechanisms, but somebody has to keep them current — US tax rates change quarterly, and a branch that adds seats changes tier and therefore its event pricing. Own both as scheduled jobs that emit a diff report; the failure mode is silent, correct-looking, and found by an auditor.</p>
+        </div>
+        <div class="q">
+          <span class="tag">Decide</span>
+          <p><strong>Initial tier bands.</strong> Four tiers is the starting assumption and the table can prove it wrong, but the seat thresholds themselves still need a first pass from someone who knows the estate. Matthews anchors the middle; the boundaries are a product call, not a schema one.</p>
+        </div>
+        <div class="q">
+          <span class="tag">Risk</span>
+          <p><strong>Cross-branch gift card liability.</strong> A global ledger is the right call and the only one matching customer expectation, but any branch can redeem value another branch sold. Inter-branch reconciliation is a finance concern the mocked adapters will never surface — flag it before the mock is swapped for real issuance.</p>
+        </div>
+        <div class="q">
+          <span class="tag">Decide</span>
+
+        <div class="q">
+          <span class="tag">Risk</span>
+          <p><strong>ADK + LiteLLM + a small local model.</strong> This is the single likeliest thing to force a redesign, and the $0 posture puts it on the critical path rather than the margin: ADK reaches Ollama through LiteLLM, and a 7B model's tool-calling fidelity is the weakest link in the chain. Run that conformance experiment <em>first</em>, before any agent code. If it fails, the fallback is Gemini's free tier for the barista only — the abstraction and the other two agents are unaffected.</p>
+        </div>
+        <div class="q">
+          <span class="tag">Risk</span>
+          <p><strong>Re-embedding cost.</strong> Changing the catalog's embedding provider invalidates every vector. Treat the embedding provider as an environment-level constant, not a per-request knob, and budget a migration job for the day it changes.</p>
+        </div>
+        <div class="q">
+          <span class="tag">Scope</span>
+          <p><strong>Guest-to-account migration.</strong> Customer accounts are in from the start, and so is guest ordering — so the cart, all three chat sessions, any in-flight order and a just-purchased gift card have to survive a guest registering mid-flow. Easy to design now, genuinely painful to retrofit; specify it before the first customer-facing slice ships.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>Brakeman's Coffee &amp; Supply — agent platform</span>
+    <span>Architecture plan · rev A · pre-implementation</span>
+  </footer>
+
+</div>
+
+</body>
+</html>

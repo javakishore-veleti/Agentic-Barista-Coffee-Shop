@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 280" width="1200" height="280" role="img" aria-label="Brakeman's Agent Platform">
+  <rect width="1200" height="280" fill="#111513"/>
+  <rect x="0" y="0" width="1200" height="4" fill="#62BC91"/>
+  <g font-family="Georgia, 'Times New Roman', serif">
+    <text x="72" y="112" font-size="60" font-weight="700" fill="#E3E8E4" letter-spacing="-1">BRAKEMAN'S</text>
+    <text x="72" y="176" font-size="60" font-weight="700" fill="#62BC91" letter-spacing="-1">AGENT PLATFORM</text>
+  </g>
+  <g font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" fill="#98A29E">
+    <text x="74" y="216" font-size="16" letter-spacing="2.4">GOOGLE ADK · LANGGRAPH · LANGCHAIN · MCP · FASTAPI · ANGULAR</text>
+    <text x="74" y="245" font-size="13" letter-spacing="1.6" fill="#79837F">1,000 BRANCHES · ONE MENU · THREE AGENTIC SURFACES</text>
+  </g>
+  <g stroke="#2C3431" stroke-width="3">
+    <line x1="900" y1="70" x2="1140" y2="70"/>
+    <line x1="900" y1="106" x2="1140" y2="106"/>
+  </g>
+  <g stroke="#2C3431" stroke-width="6">
+    <line x1="924" y1="58" x2="924" y2="118"/><line x1="972" y1="58" x2="972" y2="118"/>
+    <line x1="1020" y1="58" x2="1020" y2="118"/><line x1="1068" y1="58" x2="1068" y2="118"/>
+    <line x1="1116" y1="58" x2="1116" y2="118"/>
+  </g>
+  <rect x="988" y="152" width="64" height="86" rx="10" fill="none" stroke="#98A29E" stroke-width="3"/>
+  <circle cx="1020" cy="176" r="12" fill="#E08A56"/>
+  <circle cx="1020" cy="212" r="12" fill="#62BC91"/>
+  <line x1="1020" y1="238" x2="1020" y2="262" stroke="#98A29E" stroke-width="3"/>
+</svg>
