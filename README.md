@@ -1,7 +1,7 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="Docs/site/assets/banner-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="Docs/site/assets/banner-light.svg">
-  <img alt="AKIV Barista Coffee Shop Agentic Platform" src="Docs/site/assets/banner-light.svg" width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="Docs/site/assets/akiv-banner-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="Docs/site/assets/akiv-banner-light.svg">
+  <img alt="AKIV Barista Coffee Shop Agentic Platform" src="Docs/site/assets/akiv-banner-light.svg" width="100%">
 </picture>
 
 <p align="center">
