@@ -36,12 +36,12 @@
 | **03** | [The three agents](#the-three-agents) | Why ADK, why LangGraph, why LangChain |
 | **04** | [The MCP tool layer](#the-mcp-tool-layer) | One tool definition, three frameworks |
 | **05** | [Configuration seams](#configuration-seams) | Provider, store and identity — all per-service |
-| **05a** | [Branches and the order model](#branches-and-the-order-model) | 1,000 branches, one menu, a real commerce document |
-| **06** | [The $1 budget](#the-1-budget) | Every default chosen for $0 standing cost |
-| **07** | [Repository layout](#repository-layout) | Where everything lives |
-| **07** | [Quick start](#quick-start) | `docker-all-up.sh` and what it does |
-| **08** | [Cloud provisioning](#cloud-provisioning) | Numbered, manually-triggered GitHub Actions |
-| **09** | [How we build](#how-we-build-backlog--openspec) | The backlog, and the OpenSpec pipeline |
+| **06** | [Branches and the order model](#branches-and-the-order-model) | 1,000 branches, one menu, a real commerce document |
+| **07** | [The $1 budget](#the-1-budget) | Every default chosen for $0 standing cost |
+| **08** | [Repository layout](#repository-layout) | Where everything lives |
+| **09** | [Quick start](#quick-start) | `docker-all-up.sh` and what it does |
+| **10** | [Cloud provisioning](#cloud-provisioning) | Numbered, manually-triggered GitHub Actions |
+| **11** | [How we build](#how-we-build-backlog--openspec) | The backlog, and the OpenSpec pipeline |
 
 ---
 
@@ -152,8 +152,9 @@ Two switches, each read in exactly one place, each settable per service.
 
 ```dotenv
 # Middleware/barista-agent/.env
-BARISTA_LLM_PROVIDER=bedrock
-BARISTA_LLM_MODEL=us.anthropic.claude-sonnet-4-5-20250929-v1:0
+BARISTA_LLM_PROVIDER=ollama                          # the $0 default
+BARISTA_LLM_MODEL=qwen2.5:7b
+BARISTA_LLM_BASE_URL=http://ollama:11434
 
 # the embedding provider is a SEPARATE switch from the chat provider
 CATALOG_EMBED_PROVIDER=ollama
@@ -264,7 +265,7 @@ is doubly unable to issue a gift card — capability and authority are separate 
 |---|---|---|
 | **Menu** | No — brand-wide and identical | Only availability, the daily rotation, and occasional regional price override |
 | **Events** | Yes, substantially | Branch size tier sets capacity, hostable event types, staffing cost — and therefore the rate card |
-| **Gift cards** | No, and must not | A card bought at the reference branch redeems in Charlotte. Branch is an attribute of a transaction, never a partition of the balance |
+| **Gift cards** | No, and must not | A card bought at one branch redeems at any other. Branch is an attribute of a transaction, never a partition of the balance |
 
 ```
 catalog_items        ~50 rows    brand-wide, canonical, embedded exactly once
@@ -280,7 +281,7 @@ price_override_request  proposed_price · reason · requested_by · status · ap
 **Tiering is data, not an enum.** Seats is the primary driver (event capacity is literally seats), square
 footage breaks ties, and `staffing_cost_index` modifies price rather than capacity. A nightly job assigns
 tiers from metrics; a branch can be pinned manually *with a recorded reason*, and the job leaves it alone.
-Start with four tiers and let the table prove that number. the reference branch seeds the mid tier as real
+Start with four tiers and let the table prove that number. The reference branch seeds the mid tier as real
 `event_rate_card` rows — not constants in code.
 
 **Price authority is a policy table with an approval trail.** A regional manager proposes an override; inside
