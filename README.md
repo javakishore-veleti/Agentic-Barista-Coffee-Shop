@@ -67,6 +67,67 @@ Scope is the agentic platform: the services it exposes, the capabilities it hold
 delivers, and its domain boundaries. Retail operations — roasting, supply chain, staffing and store
 management — sit outside this boundary and are treated as existing business functions.
 
+### The four views, and how they relate
+
+The section presents the platform four times, from four angles. They are not alternative descriptions of the
+same list — each answers a different question, and something that appears in one usually appears in the
+others in a different form.
+
+The first three come from business architecture. The fourth, the context map, comes from domain-driven
+design. Mixing traditions is deliberate: the first three describe what the business does, and the context map
+is where that starts constraining how the software is divided.
+
+| | Answers | Form | How often it changes | Example here |
+|---|---|---|---|---|
+| **Business capability** | What are we *able* to do? | A noun phrase. No sequence, no consumer, no technology | Rarely. Survives reorganisation and rewrites | *Grounding & Truth Assurance* |
+| **Business service** | What do we *offer*, to whom, under what contract? | A named consumer plus a published contract | When the offer or its contract changes | *Grounded Conversation*, offered to customers over the chat envelope |
+| **Value stream** | How does a stakeholder *get* value, from trigger to outcome? | An ordered set of stages, each adding value | When the journey changes, not when the technology does | *Conversation → Fulfilled order* |
+| **Context map** | Where does one model end and another begin, and who owns each? | Named boundaries plus a typed relationship on every edge | When ownership or integration changes | *Conversation → Tool Governance → Catalog* |
+
+**One example through all four.** The ability to ensure every claim traces to a source is a **capability** —
+it would still be named that if the platform were rebuilt in a different language on a different cloud.
+Packaged and exposed to customers, that capability becomes the **Grounded Conversation service**, with the
+SSE chat envelope as its contract. "Ground in reality" is a **stage** in the *Conversation → Fulfilled order*
+value stream, where the stream draws on that capability to move the customer forward. And on the **context
+map** that one capability turns out to span three boundaries — the conversation context asks, Tool Governance
+translates, Catalog answers — which is the map's job: to say which boundary owns which part, and what the
+contract is at each seam.
+
+A capability is frequently realised across several bounded contexts, as here. That is normal, and it is the
+reason both views are needed: the capability says the ability exists, the context map says who holds which
+piece of it.
+
+**Which comes first** depends on whether you are modelling or discovering.
+
+- *Modelled* order is capabilities first. They are the most stable layer, so services and value streams can
+  be re-cut against them without the model being rebuilt. A capability model outlives the org chart.
+- *Discovered* order is usually value streams first, because a real project starts from "how does a customer
+  actually get what they came for" and derives the capabilities from the stages that turn out to be needed.
+- *This document* runs services, then capabilities, then value streams, then the context map — reading order,
+  not modelling order. Services come first because they are the most concrete: they have a named consumer and
+  a contract, so they are the easiest thing to disagree with.
+
+**The context map comes last of the four, and that is not arbitrary.** A boundary cannot be placed until you
+know what abilities exist, what is offered to whom, and how value moves between them — so it consumes the
+other three as input. It is also the last artefact on the business side and the first that constrains code:
+everything before it could be implemented many ways, and the context map begins ruling some of them out.
+That is why it sits immediately before the technical architecture in this document rather than anywhere else.
+
+**A test for telling them apart**, when something is hard to classify:
+
+- If it would survive a reorganisation and a full rewrite, it is a **capability**.
+- If it has a consumer and a published contract, it is a **service**.
+- If it has a trigger, ordered stages and an end state, it is a **value stream**.
+- If it names a boundary and states who conforms to whom, it belongs on the **context map**.
+
+Four distinctions worth keeping straight: a capability is not a process, because it has no sequence; a
+service is not an API, though it is usually reached through one; a value stream is not a process flow, since
+its stages are units of value to a stakeholder rather than tasks in a workflow; and a context map is not a
+deployment or component diagram — its boundaries are around *models and their language*, not around
+processes or servers. Two services can run in one process and still be separate contexts, and one context can
+be spread across several services.
+
+
 ### Business services
 
 Each service has a named consumer and a published contract, and can be consumed independently of the others.
